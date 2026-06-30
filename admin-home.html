@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>運営ダッシュボード｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-admin">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">運営ダッシュボード</h1>
+  <p class="page-lead">メディスポット運営事務局 管理画面</p>
+
+  <div id="unpaidNotice"></div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="cntSeeker" style="color:var(--seeker)"></div>
+      <div class="label">求職者</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cntEmployer" style="color:var(--employer)"></div>
+      <div class="label">求人者</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cntMatch" style="color:var(--match)"></div>
+      <div class="label">マッチング成立</div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="sumRevenue" style="color:var(--admin); font-size:24px;"></div>
+      <div class="label">売上合計（税込）</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="sumProfit" style="color:var(--admin); font-size:24px;"></div>
+      <div class="label">純売上（税抜）</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="sumUnpaid" style="color:var(--danger); font-size:24px;"></div>
+      <div class="label">未入金（請求書払い）</div>
+    </div>
+  </div>
+
+  <div class="menu-grid">
+    <a class="menu-link" href="admin-users.html">
+      <span class="icon">👥</span>
+      <span>
+        <h3>会員管理</h3>
+        <p>求人者・求職者の情報を確認・管理する</p>
+      </span>
+    </a>
+    <a class="menu-link" href="admin-matches.html">
+      <span class="icon">📋</span>
+      <span>
+        <h3>マッチング進捗管理</h3>
+        <p>応募〜選考〜成立〜入金の進捗を一覧で管理</p>
+      </span>
+    </a>
+    <a class="menu-link" href="admin-billing.html">
+      <span class="icon">📃</span>
+      <span>
+        <h3>請求管理</h3>
+        <p>マッチング案件の利益チェックと請求書の発行</p>
+      </span>
+    </a>
+    <a class="menu-link" href="admin-masters.html">
+      <span class="icon">🔧</span>
+      <span>
+        <h3>職種・スキル管理</h3>
+        <p>職種・職種別スキルを自由に登録・編集</p>
+      </span>
+    </a>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('admin');
+  if (me) {
+    renderHeader('admin-home.html');
+    renderFooter();
+
+    const db = loadDB();
+    const yen = n => '¥' + n.toLocaleString('ja-JP');
+
+    document.getElementById('cntSeeker').textContent = db.users.filter(u => u.role === 'seeker').length;
+    document.getElementById('cntEmployer').textContent = db.users.filter(u => u.role === 'employer').length;
+    document.getElementById('cntMatch').textContent = db.matches.length;
+
+    const revenue = db.matches.reduce((s, m) => s + m.fee, 0);
+    const profit = db.matches.reduce((s, m) => s + feeBreakdown(m.fee).exTax, 0);
+    const unpaidMatches = db.matches.filter(m => m.paymentStatus === 'unpaid');
+    const unpaid = unpaidMatches.reduce((s, m) => s + m.fee, 0);
+
+    document.getElementById('sumRevenue').textContent = yen(revenue);
+    document.getElementById('sumProfit').textContent = yen(profit);
+    document.getElementById('sumUnpaid').textContent = yen(unpaid);
+
+    if (unpaidMatches.length > 0) {
+      document.getElementById('unpaidNotice').innerHTML =
+        `<div class="notice info">⚠️ 未入金（請求書払い）の案件が <strong>${unpaidMatches.length}件</strong>（¥${unpaid.toLocaleString('ja-JP')}）あります。 <a href="admin-billing.html">請求管理で確認・請求書を発行する</a></div>`;
+    }
+  }
+</script>
+</body>
+</html>
