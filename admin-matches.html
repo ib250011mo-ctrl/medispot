@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>マッチング進捗管理｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-admin">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">マッチング進捗管理</h1>
+  <p class="page-lead">すべての応募・マッチングの進捗状況（応募 → 選考 → 成立 → 入金）を一覧で管理します。</p>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="cApplied" style="color:var(--seeker); font-size:24px;">0</div>
+      <div class="label">応募中</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cScreening" style="color:#a16207; font-size:24px;">0</div>
+      <div class="label">選考中</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cMatched" style="color:var(--match); font-size:24px;">0</div>
+      <div class="label">マッチング成立</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cRejected" style="color:var(--muted); font-size:24px;">0</div>
+      <div class="label">見送り</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+      <h2 style="font-size:17px;">案件一覧</h2>
+      <select id="filter" onchange="render()" style="width:auto; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px;">
+        <option value="">すべての進捗</option>
+        <option value="applied">応募中</option>
+        <option value="screening">選考中</option>
+        <option value="matched">マッチング成立</option>
+        <option value="rejected">見送り</option>
+      </select>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('admin');
+  if (me) {
+    renderHeader('admin-matches.html');
+    renderFooter();
+    render();
+
+    function progressBar(status) {
+      // 応募 → 選考 → 成立 の進捗。見送りは別表示
+      if (status === 'rejected') return '<span class="status rejected">見送り</span>';
+      const steps = [['applied', '応募'], ['screening', '選考'], ['matched', '成立']];
+      const order = { applied: 0, screening: 1, matched: 2 };
+      const cur = order[status] ?? 0;
+      return '<span style="display:inline-flex; gap:4px;">' + steps.map((s, i) =>
+        `<span style="font-size:11px; padding:2px 8px; border-radius:999px; ${i <= cur ? 'background:var(--admin-light);color:var(--admin);font-weight:700;' : 'background:#f3f4f6;color:#9ca3af;'}">${s[1]}</span>`
+      ).join('<span style="color:#d1d5db;"></span>') + '</span>';
+    }
+
+    function render() {
+      const db = loadDB();
+      const apps = db.applications.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+
+      document.getElementById('cApplied').textContent = apps.filter(a => a.status === 'applied').length;
+      document.getElementById('cScreening').textContent = apps.filter(a => a.status === 'screening').length;
+      document.getElementById('cMatched').textContent = apps.filter(a => a.status === 'matched').length;
+      document.getElementById('cRejected').textContent = apps.filter(a => a.status === 'rejected').length;
+
+      const filter = document.getElementById('filter').value;
+      const rows = apps.filter(a => !filter || a.status === filter);
+      const el = document.getElementById('list');
+
+      if (rows.length === 0) {
+        el.innerHTML = '<div class="empty">該当する案件がありません。</div>';
+        return;
+      }
+
+      el.innerHTML = `<table class="list">
+        <tr><th>応募日</th><th>求人 / 求人者</th><th>応募者</th><th>進捗</th><th>決済</th><th>入金</th></tr>
+        ${rows.map(a => {
+          const job = getJob(db, a.jobId);
+          const employer = job && getUser(db, job.employerId);
+          const seeker = getUser(db, a.seekerId);
+          const m = db.matches.find(x => x.applicationId === a.id);
+          const payMethod = m ? (PAYMENT_METHOD_LABEL[m.paymentMethod] || '-') : '-';
+          const payStatus = m ? (m.paymentStatus === 'paid' ? '<span class="status paid">入金済み</span>' : '<span class="status unpaid">未入金</span>') : '-';
+          return `<tr>
+            <td>${esc(a.createdAt)}</td>
+            <td><strong>${esc(job ? job.title : '-')}</strong><br><span style="font-size:12px; color:var(--muted)">${esc(employer ? employer.org.name : '-')}</span></td>
+            <td>${esc(seeker ? seeker.name : '-')}<br><span style="font-size:12px; color:var(--muted)">${esc(seeker ? seeker.profile.category || '' : '')}</span></td>
+            <td>${progressBar(a.status)}</td>
+            <td>${esc(payMethod)}</td>
+            <td>${payStatus}</td>
+          </tr>`;
+        }).join('')}
+      </table>`;
+    }
+  }
+</script>
+</body>
+</html>

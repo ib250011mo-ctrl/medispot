@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>求人検索・一覧｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-seeker">
+
+  <div id="header">
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="index.html">
+          <span class="mark">🏥</span>
+          メディスポット
+        </a>
+        <nav>
+          <span class="role-badge seeker">求職者：佐藤 花子</span>
+          <a href="seeker-home.html">マイページ</a>
+          <a href="seeker-profile.html">プロフィール</a>
+          <a href="seeker-resume.html">履歴書・職歴</a>
+          <a href="seeker-jobs.html" class="active">求人検索</a>
+          <a href="#" onclick="logout();return false;">ログアウト</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <div class="container">
+    <h1 class="page-title">求人検索・一覧</h1>
+    <p class="page-lead">条件を指定して、希望に合う求人を探しましょう。</p>
+
+    <!-- 検索フォーム -->
+    <form class="card" onsubmit="return search(event)"
+      style="display:grid; grid-template-columns:1fr 200px 200px auto; gap:12px; align-items:end;"
+      id="searchForm">
+      <div class="field" style="margin:0;">
+        <label>キーワード</label>
+        <input type="text" id="fKeyword" placeholder="例）外来、日勤のみ、土日休み">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>職種</label>
+        <select id="fCategory">
+          <option value="">すべて</option>
+          <option>看護師</option>
+          <option>保健師</option>
+          <option>助産師</option>
+          <option>臨床検査技師</option>
+          <option>放射線技師</option>
+          <option>理学療法士（PT）</option>
+          <option>作業療法士（OT）</option>
+          <option>言語聴覚士（ST）</option>
+          <option>ヘルパー</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>雇用形態</label>
+        <select id="fType">
+          <option value="">すべて</option>
+          <option>常勤</option>
+          <option>非常勤</option>
+          <option>スポット（単発）</option>
+          <option>業務委託</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">🔍 検索</button>
+    </form>
+
+    <p style="font-size:14px; color:var(--muted); margin-bottom:12px;" id="count">7件の求人が見つかりました</p>
+
+    <!-- 検索結果 -->
+    <div id="results">
+
+      <!-- job-1 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">看護師</span>
+          <span class="tag">非常勤</span>
+          <span class="tag salary">時給 2,200円〜2,600円</span>
+          <span class="tag">📍 東京都世田谷区</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-1">【日勤のみ】外来看護師（ブランクOK・週3日〜）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/05/12</span>
+          <span class="status applied">応募済み</span>
+        </div>
+      </div>
+
+      <!-- job-2 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">放射線技師</span>
+          <span class="tag">常勤</span>
+          <span class="tag salary">月給 28万円〜35万円</span>
+          <span class="tag">📍 東京都世田谷区</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-2">放射線技師（健診・一般撮影／土日休み）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/05/20</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-2">詳細を見る</a>
+        </div>
+      </div>
+
+      <!-- job-3 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">作業療法士（OT）</span>
+          <span class="tag">非常勤</span>
+          <span class="tag salary">時給 2,000円〜2,400円</span>
+          <span class="tag">📍 東京都狛江市</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-3">作業療法士（OT）（回復期リハ・週3日〜）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/05/28</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-3">詳細を見る</a>
+        </div>
+      </div>
+
+      <!-- job-4 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">理学療法士（PT）</span>
+          <span class="tag">常勤</span>
+          <span class="tag salary">月給 28万円〜34万円</span>
+          <span class="tag">📍 東京都調布市</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-4">理学療法士（PT）（整形外科クリニック・新設リハ室）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/06/01</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-4">詳細を見る</a>
+        </div>
+      </div>
+
+      <!-- job-5 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">言語聴覚士（ST）</span>
+          <span class="tag">非常勤</span>
+          <span class="tag salary">時給 2,100円〜2,500円</span>
+          <span class="tag">📍 東京都世田谷区</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-5">言語聴覚士（ST）（外来・小児言語訓練）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/06/05</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-5">詳細を見る</a>
+        </div>
+      </div>
+
+      <!-- job-7 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">ヘルパー</span>
+          <span class="tag">非常勤</span>
+          <span class="tag salary">時給 1,500円〜1,800円</span>
+          <span class="tag">📍 東京都調布市</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-7">ヘルパー（訪問介護・直行直帰OK）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/06/10</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-7">詳細を見る</a>
+        </div>
+      </div>
+
+      <!-- job-6 -->
+      <div class="job-card">
+        <div class="job-meta">
+          <span class="tag cat">臨床検査技師</span>
+          <span class="tag">常勤</span>
+          <span class="tag salary">月給 26万円〜32万円</span>
+          <span class="tag">📍 東京都渋谷区</span>
+        </div>
+        <h3>
+          <a href="seeker-job-detail.html?id=job-6">臨床検査技師（健診センター・年間休日125日）</a>
+        </h3>
+        <p class="org">🏥 ブランチ総合クリニック（クリニック（無床））</p>
+        <div class="foot">
+          <span class="date">掲載日：2026/06/08</span>
+          <a class="btn small" href="seeker-job-detail.html?id=job-6">詳細を見る</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="footer">
+    <footer class="site-footer">
+      " 医療特化型広告マッチングシステム プロトタイプ V1 ／ "
+      <a href="#" onclick="resetDB();return false;">デモデータを初期化</a>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const me = requireRole('seeker');
+    if (me) {
+      renderHeader('seeker-jobs.html');
+      renderFooter();
+
+      // フォームのグリッドはモバイルで1カラムに
+      if (matchMedia('(max-width: 720px)').matches) {
+        document.getElementById('searchForm').style.gridTemplateColumns = '1fr';
+      }
+
+      // 職種・雇用形態を動的に追加
+      document.getElementById('fCategory').innerHTML +=
+        getCategories().map(c => `<option>${c}</option>`).join('');
+      document.getElementById('fType').innerHTML +=
+        EMPLOYMENT_TYPES.map(t => `<option>${t}</option>`).join('');
+
+      const db = loadDB();
+      const myApps = applicationsForSeeker(db, me.id);
+
+      function render(jobs) {
+        document.getElementById('count').textContent = `${jobs.length}件の求人が見つかりました`;
+
+        const el = document.getElementById('results');
+        if (jobs.length === 0) {
+          el.innerHTML = `<div class="card empty"><span class="icon">🔍</span>条件に合う求人が見つかりませんでした。条件を変えてお試しください。</div>`;
+          return;
+        }
+
+        el.innerHTML = jobs.map(j => {
+          const emp = getUser(db, j.employerId);
+          const applied = myApps.some(a => a.jobId === j.id);
+          return `<div class="job-card">
+  <div class="job-meta">
+    <span class="tag cat">${esc(j.category)}</span>
+    <span class="tag">${esc(j.type)}</span>
+    <span class="tag salary">${esc(j.salary)}</span>
+    <span class="tag">📍 ${esc(j.location)}</span>
+  </div>
+  <h3><a href="seeker-job-detail.html?id=${j.id}">${esc(j.title)}</a></h3>
+  <p class="org">🏥 ${esc(emp.org_name)} ${esc(emp.org_facility)}</p>
+  <div class="foot">
+    <span class="date">掲載日：${esc(j.createdAt)}</span>
+    ${applied
+      ? `<span class="status applied">応募済み</span>`
+      : `<a class="btn small" href="seeker-job-detail.html?id=${j.id}">詳細を見る</a>`
+    }
+  </div>
+</div>`;
+        }).join('');
+      }
+
+      function search(e) {
+        if (e) e.preventDefault();
+        const kw   = document.getElementById('fKeyword').value.trim();
+        const cat  = document.getElementById('fCategory').value;
+        const type = document.getElementById('fType').value;
+        const jobs = db.jobs.filter(j =>
+          j.status === 'open' &&
+          (!cat  || j.category === cat) &&
+          (!type || j.type === type) &&
+          (!kw   || (j.title + j.description + j.location + j.requirements).includes(kw))
+        );
+        render(jobs);
+        return false;
+      }
+
+      search();
+    }
+  </script>
+</body>
+</html>

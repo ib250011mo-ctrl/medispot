@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>職種・スキル管理｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-admin">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">職種・スキル管理</h1>
+  <p class="page-lead">求人・求職者が選択できる職種と、職種ごとのスキルを運営側で自由に登録・編集できます（登録数の制限はありません）。</p>
+
+  <div class="notice info" style="font-size:13px;">
+    💡 ここで設定した職種・スキルは、求人作成・求人検索・求職者プロフィールの選択肢に即時反映されます。各職種には「その他（自由記載）」が自動で付与されます。
+  </div>
+
+  <div class="grid-2">
+
+    <!-- 職種 -->
+    <div class="card">
+      <h2 style="font-size:17px; margin-bottom:12px;">職種</h2>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="text" id="newCat" placeholder="例）管理栄養士" style="flex:1;"
+          onkeydown="if(event.key==='Enter'){addCategory();return false;}">
+        <button class="btn purple" onclick="addCategory()">＋ 追加</button>
+      </div>
+      <div id="catList"></div>
+    </div>
+
+    <!-- スキル -->
+    <div class="card">
+      <h2 style="font-size:17px; margin-bottom:4px;">スキル</h2>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;" id="skillFor">職種を選択してください。</p>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="text" id="newSkill" placeholder="例）NICU" style="flex:1;"
+          onkeydown="if(event.key==='Enter'){addSkill();return false;}" disabled>
+        <button class="btn purple" id="addSkillBtn" onclick="addSkill()" disabled>＋ 追加</button>
+      </div>
+      <div id="skillList"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('admin');
+  if (me) {
+    renderHeader('admin-masters.html');
+    renderFooter();
+
+    let selected = null;
+
+    function render() {
+      const db = loadDB();
+      const cats = getCategories(db);
+      const map = getSkillMap(db);
+      if (selected && !cats.includes(selected)) selected = null;
+
+      // 職種一覧
+      document.getElementById('catList').innerHTML = cats.length === 0
+        ? '<p style="font-size:13px; color:var(--muted);">職種が登録されていません。</p>'
+        : cats.map(c => `<div class="repeat-row" style="align-items:center;">
+            <button type="button" class="btn small ${c === selected ? 'purple' : 'outline'}" style="flex:1; text-align:left;" onclick="selectCat('${esc(c)}')">${esc(c)} <span style="opacity:.7;">（スキル${(map[c] || []).length}件）</span></button>
+            <button type="button" class="btn small danger" onclick="removeCategory('${esc(c)}')">削除</button>
+          </div>`).join('');
+
+      // スキル一覧
+      const newSkill = document.getElementById('newSkill');
+      const addBtn = document.getElementById('addSkillBtn');
+      if (!selected) {
+        document.getElementById('skillFor').textContent = '職種を選択してください。';
+        document.getElementById('skillList').innerHTML = '';
+        newSkill.disabled = true; addBtn.disabled = true;
+        return;
+      }
+      newSkill.disabled = false; addBtn.disabled = false;
+      document.getElementById('skillFor').innerHTML = `「<strong>${esc(selected)}</strong>」のスキル`;
+      const skills = map[selected] || [];
+      document.getElementById('skillList').innerHTML =
+        (skills.length === 0 ? '<p style="font-size:13px; color:var(--muted);">スキルが登録されていません。</p>' : '') +
+        skills.map(s => `<div class="repeat-row" style="align-items:center;">
+            <span style="flex:1;">${esc(s)}</span>
+            <button type="button" class="btn small danger" onclick="removeSkill('${esc(s)}')">削除</button>
+          </div>`).join('') +
+        `<p style="font-size:12px; color:var(--muted); margin-top:6px;">「その他（自由記載）」は自動で付与されます。</p>`;
+    }
+
+    window.selectCat = function (c) { selected = c; render(); };
+
+    window.addCategory = function () {
+      const input = document.getElementById('newCat');
+      const name = input.value.trim();
+      if (!name) return;
+      const db = loadDB();
+      if (getCategories(db).includes(name)) { alert('同名の職種が既に登録されています。'); return; }
+      db.categories = getCategories(db).concat([name]);
+      if (!db.skillMap) db.skillMap = {};
+      if (!db.skillMap[name]) db.skillMap[name] = [];
+      saveDB(db);
+      input.value = '';
+      selected = name;
+      render();
+    };
+
+    window.removeCategory = function (c) {
+      if (!confirm(`職種「${c}」を削除しますか？\n紐づくスキル候補も削除されます。`)) return;
+      const db = loadDB();
+      db.categories = getCategories(db).filter(x => x !== c);
+      if (db.skillMap) delete db.skillMap[c];
+      saveDB(db);
+      if (selected === c) selected = null;
+      render();
+    };
+
+    window.addSkill = function () {
+      if (!selected) return;
+      const input = document.getElementById('newSkill');
+      const name = input.value.trim();
+      if (!name) return;
+      if (name === SKILL_OTHER) { alert('「その他（自由記載）」は自動で付与されるため登録不要です。'); return; }
+      const db = loadDB();
+      if (!db.skillMap) db.skillMap = {};
+      const list = db.skillMap[selected] || [];
+      if (list.includes(name)) { alert('同名のスキルが既に登録されています。'); return; }
+      db.skillMap[selected] = list.concat([name]);
+      saveDB(db);
+      input.value = '';
+      render();
+    };
+
+    window.removeSkill = function (s) {
+      const db = loadDB();
+      if (db.skillMap && db.skillMap[selected]) {
+        db.skillMap[selected] = db.skillMap[selected].filter(x => x !== s);
+        saveDB(db);
+      }
+      render();
+    };
+
+    render();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+/* ===========================================================
+   メディスポット プロトタイプ 共通スタイル (assets/style.css)
+   =========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');
+
+:root {
+  --seeker: #0d9488;       /* teal */
+  --seeker-light: #ccfbf1;
+  --employer: #ea580c;     /* coral/orange */
+  --employer-light: #ffedd5;
+  --admin: #4f46e5;        /* indigo/navy */
+  --admin-light: #e0e7ff;
+  --match: #16a34a;        /* green */
+  --danger: #dc2626;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --bg: #f9fafb;
+  --ink: #1f2937;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Zen Maru Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+a { color: var(--seeker); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- レイアウト ---------- */
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+.container.narrow {
+  max-width: 560px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+.page-lead {
+  color: var(--muted);
+  margin: 0 0 20px;
+  font-size: 14px;
+}
+
+/* ---------- ヘッダー ---------- */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.site-header .inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--ink);
+}
+.brand .mark { font-size: 20px; }
+.brand:hover { text-decoration: none; }
+
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.site-header nav a {
+  color: var(--ink);
+  padding: 4px 2px;
+  border-bottom: 2px solid transparent;
+}
+.site-header nav a.active {
+  border-bottom-color: var(--seeker);
+  font-weight: 700;
+}
+body.role-employer .site-header nav a.active { border-bottom-color: var(--employer); }
+body.role-admin .site-header nav a.active { border-bottom-color: var(--admin); }
+
+.role-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.role-badge.seeker { background: var(--seeker-light); color: var(--seeker); }
+.role-badge.employer { background: var(--employer-light); color: var(--employer); }
+.role-badge.admin { background: var(--admin-light); color: var(--admin); }
+
+/* ---------- フッター ---------- */
+.site-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 30px 20px;
+  border-top: 1px solid var(--line);
+  margin-top: 40px;
+}
+.site-footer a { color: var(--muted); }
+
+/* ---------- カード ---------- */
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.card.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 20px;
+}
+.card.empty .icon {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+.card.done-hero {
+  text-align: center;
+  padding: 36px 22px;
+}
+.card.done-hero .icon { font-size: 44px; margin-bottom: 10px; }
+.card.done-hero h1 { font-size: 22px; margin: 0 0 12px; }
+.card.done-hero.match { border-color: var(--match); background: #f0fdf4; }
+
+/* ---------- フォーム ---------- */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.field .req, .req {
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ink);
+}
+textarea { min-height: 90px; resize: vertical; }
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--seeker);
+  outline-offset: 1px;
+}
+.form-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.form-error {
+  display: none;
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.form-error.show { display: block; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ---------- ボタン ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--seeker);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+}
+.btn:hover { opacity: .9; text-decoration: none; }
+.btn.block { width: 100%; }
+.btn.small { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+.btn.outline { background: #fff; color: var(--ink); border: 1px solid #d1d5db; }
+.btn.green { background: var(--match); }
+.btn.orange { background: var(--employer); }
+.btn.purple { background: var(--admin); }
+.btn.danger { background: var(--danger); }
+
+body.role-employer .btn:not(.outline):not(.green):not(.danger):not(.purple) { background: var(--employer); }
+body.role-admin .btn:not(.outline):not(.green):not(.danger):not(.purple) { background: var(--admin); }
+
+/* ---------- 役割選択カード（register） ---------- */
+.role-select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .role-select-grid { grid-template-columns: 1fr; }
+}
+.role-card {
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+}
+.role-card:hover { border-color: var(--seeker); transform: translateY(-2px); }
+.role-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+.role-card h3 { margin: 0 0 6px; font-size: 16px; }
+.role-card p { margin: 0; font-size: 13px; color: var(--muted); }
+
+.register-form { margin-top: 20px; }
+.form-title { font-size: 18px; margin: 0 0 16px; }
+.btn.ghost { background: transparent; color: var(--muted); padding: 8px 0; }
+.login-link { text-align: center; font-size: 13px; margin-top: 16px; }
+
+/* ---------- ダッシュボード（求人者/管理者） ---------- */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 640px) {
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+}
+.dash-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+.dash-card .num { font-size: 28px; font-weight: 900; }
+.dash-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .menu-grid { grid-template-columns: 1fr; }
+}
+.menu-link {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  color: var(--ink);
+}
+.menu-link:hover { border-color: var(--seeker); text-decoration: none; }
+.menu-link .icon { font-size: 26px; }
+.menu-link h3 { margin: 0 0 4px; font-size: 15px; }
+.menu-link p { margin: 0; font-size: 12px; color: var(--muted); }
+
+/* ---------- 通知 ---------- */
+.notice {
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.notice.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.notice.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.notice.match { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.notice a { font-weight: 700; }
+
+/* ---------- 求人カード（employer-jobs） ---------- */
+.job-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.job-card .job-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.job-card h3 { margin: 0 0 10px; font-size: 16px; }
+.job-card .foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--ink);
+}
+.tag.cat { background: var(--seeker-light); color: var(--seeker); font-weight: 700; }
+.tag.salary { background: #fff7ed; color: #c2410c; }
+
+/* ---------- ステータスバッジ ---------- */
+.status {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.status.open, .status.active { background: #dcfce7; color: #166534; }
+.status.closed, .status.suspended { background: #f3f4f6; color: #6b7280; }
+.status.applied { background: #dbeafe; color: #1e40af; }
+.status.screening { background: #fef9c3; color: #a16207; }
+.status.matched { background: #dcfce7; color: #166534; }
+.status.rejected { background: #f3f4f6; color: #6b7280; }
+.status.paid { background: #dcfce7; color: #166534; }
+.status.unpaid { background: #fee2e2; color: #991b1b; }
+
+/* ---------- 定義リスト（応募者詳細） ---------- */
+.dl {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  font-size: 13px;
+  margin: 0;
+}
+.dl dt { color: var(--muted); font-weight: 700; }
+.dl dd { margin: 0; }
+@media (max-width: 640px) {
+  .dl { grid-template-columns: 1fr; row-gap: 4px; }
+  .dl dt { margin-top: 8px; }
+}
+
+/* ---------- テーブル（admin系一覧） ---------- */
+table.list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.list th, table.list td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+table.list th {
+  background: #f9fafb;
+  font-size: 12px;
+  color: var(--muted);
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px 0;
+  font-size: 13px;
+}
+
+/* ---------- 管理: 職種・スキル 行 ---------- */
+.repeat-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* ---------- チャット ---------- */
+.chat-box {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.chat-log {
+  height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fafafa;
+}
+.msg { display: flex; flex-direction: column; max-width: 75%; }
+.msg.mine { align-self: flex-end; align-items: flex-end; }
+.msg.theirs { align-self: flex-start; align-items: flex-start; }
+.msg .bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.msg.mine .bubble { background: var(--seeker); color: #fff; border-bottom-right-radius: 4px; }
+.msg.theirs .bubble { background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.msg .meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.chat-input textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 120px;
+}
+.chat-input .btn { align-self: flex-end; }
+
+/* ---------- 印刷時 ---------- */
+@media print {
+  .site-header, .site-footer, .noprint { display: none !important; }
+}

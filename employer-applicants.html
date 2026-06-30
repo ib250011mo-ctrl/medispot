@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>応募者一覧（選考画面）｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-employer">
+
+<div id="header"></div>
+
+<div class="container">
+  <p style="margin-bottom:16px;"><a href="employer-jobs.html">← 掲載求人管理へ戻る</a></p>
+  <h1 class="page-title">応募者一覧（選考画面）</h1>
+  <p class="page-lead" id="jobTitle">対象求人：</p>
+
+  <div class="notice info" style="font-size:13px;">
+    💡 応募者の<strong>氏名・連絡先などの個人情報は伏せて</strong>表示しています。職務経歴・スキル等を確認のうえ選考してください。「採用決定」後、決済（Pay.jp／請求書払い）が完了するとマッチングが成立し、氏名・連絡先が開示されます。
+  </div>
+
+  <div id="appList"></div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('employer');
+  if (me) {
+    renderHeader('employer-jobs.html');
+    renderFooter();
+
+    const db = loadDB();
+    const job = getJob(db, qs('jobId'));
+    const el = document.getElementById('appList');
+
+    if (!job || job.employerId !== me.id) {
+      el.innerHTML = `<div class="card empty"><span class="icon">⚠️</span>求人が見つかりませんでした。</div>`;
+    } else {
+      document.getElementById('jobTitle').innerHTML = `対象求人：<strong>${esc(job.title)}</strong>`;
+
+      const apps = applicationsForJob(db, job.id).slice().reverse();
+
+      if (apps.length === 0) {
+        el.innerHTML = `<div class="card empty"><span class="icon">📭</span>まだ応募がありません。</div>`;
+      } else {
+        // 都道府県のみ抽出（詳細住所は伏せる）
+        function prefOnly(residence) {
+          const mm = (residence || '').match(/^.+?[都道府県]/);
+          return mm ? mm[0] : '-';
+        }
+
+        // 職務経歴書の内容（氏名は含めずに表示）
+        function resumeHtml(r) {
+          if (!r) return '<span style="color:var(--muted)">未登録</span>';
+          let h = '';
+          if (r.summary) h += `<div style="margin-bottom:6px;">${esc(r.summary)}</div>`;
+          if (r.careers && r.careers.length) {
+            h += `<div style="font-weight:600; margin:8px 0 2px;">職務経歴</div>`;
+            h += r.careers.map(c => `<div style="margin-bottom:4px;">・${esc(c.period || '')}　${esc(c.company || '')}${c.dept ? ' (' + esc(c.dept) + ')' : ''}${c.detail ? '<br><span style="color:var(--muted)">' + esc(c.detail) + '</span>' : ''}</div>`).join('');
+          }
+          if (r.education && r.education.length) {
+            h += `<div style="font-weight:600; margin:8px 0 2px;">学歴</div>`;
+            h += r.education.map(e => `<div>・${esc(e.ym || '')}　${esc(e.content || '')}</div>`).join('');
+          }
+          if (r.licenses && r.licenses.length) {
+            h += `<div style="font-weight:600; margin:8px 0 2px;">免許・資格</div>`;
+            h += r.licenses.map(l => `<div>・${esc(l.ym || '')}　${esc(l.name || '')}</div>`).join('');
+          }
+          if (r.strengths) h += `<div style="font-weight:600; margin:8px 0 2px;">活かせる経験・スキル</div><div>${esc(r.strengths)}</div>`;
+          if (r.selfPr) h += `<div style="font-weight:600; margin:8px 0 2px;">自己PR</div><div>${esc(r.selfPr)}</div>`;
+          return h || '<span style="color:var(--muted)">未登録</span>';
+        }
+
+        el.innerHTML = apps.map((a, idx) => {
+          const s = getUser(db, a.seekerId);
+          const p = s.profile || {};
+          const m = db.matches.find(x => x.applicationId === a.id);
+          const revealed = a.status === 'matched'; // 成立後のみ氏名・連絡先を開示
+
+          let actions = '';
+          if (a.status === 'applied') {
+            actions = `<button class="btn small outline" onclick="setStatus('${a.id}','screening')">選考中にする</button>
+              <a class="btn small green" href="employer-payment.html?appId=${a.id}">✅ 採択決定（決済へ）</a>
+              <button class="btn small danger" onclick="setStatus('${a.id}','rejected')">見送り</button>`;
+          } else if (a.status === 'screening') {
+            actions = `<a class="btn small green" href="employer-payment.html?appId=${a.id}">✅ 採択決定（決済へ）</a>
+              <button class="btn small danger" onclick="setStatus('${a.id}','rejected')">見送り</button>`;
+          } else if (a.status === 'matched' && m) {
+            actions = `<a class="btn small orange" href="chat.html?matchId=${m.id}">💬 チャットルームへ</a>`;
+          }
+
+          const headName = revealed
+            ? `👤 ${esc(s.name)}`
+            : `応募者${String.fromCharCode(65 + idx)} <span style="font-size:12px; color:var(--muted); font-weight:normal;">（氏名非公開）</span>`;
+
+          return `<div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+              <h3 style="font-size:17px;">${headName} <span style="font-size:13px; color:var(--muted); font-weight:normal;">(${esc(p.category || '-')})${calcAge(p.birthdate) !== null ? '／' + calcAge(p.birthdate) + '歳' : ''}／実務経験 ${esc(p.experience || '-')}</span></h3>
+              ${statusBadge(a.status)}
+            </div>
+            <dl class="dl" style="margin-bottom:14px;">
+              <dt>資格</dt><dd>${esc(p.license || p.category || '-')}</dd>
+              <dt>スキル・経験</dt><dd>${((p.skills || []).concat(p.skillOther ? [p.skillOther] : [])).map(sk => `<span class="tag">${esc(sk)}</span>`).join(' ') || '-'}</dd>
+              <dt>希望雇用形態</dt><dd>${esc(p.desiredType || 'こだわらない')}</dd>
+              <dt>勤務希望エリア</dt><dd>${revealed ? esc(p.residence) : esc(prefOnly(p.residence))} <span style="font-size:12px; color:var(--muted);">（詳細は成立後に開示）</span></dd>
+              <dt>資格証</dt><dd>${(s.certificates && s.certificates.length) ? '🔒 提出済み（' + s.certificates.length + '件）' : '<span style="color:var(--muted)">未提出</span>'}</dd>
+              <dt>職務経歴書</dt><dd>${resumeHtml(s.resume)}</dd>
+              <dt>応募メッセージ</dt><dd>${esc(a.message || '-')}</dd>
+              <dt>応募日時</dt><dd>${esc(a.createdAt)}</dd>
+              ${revealed ? `<dt>連絡先</dt><dd>✉ ${esc(s.email)}</dd>` : ''}
+            </dl>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">${actions}</div>
+          </div>`;
+        }).join('');
+      }
+    }
+  }
+
+  window.setStatus = function (appId, status) {
+    if (status === 'rejected' && !confirm('この応募者を見送りにしますか？')) return;
+    const db2 = loadDB();
+    getApp(db2, appId).status = status;
+    saveDB(db2);
+    location.reload();
+  };
+</script>
+</body>
+</html>

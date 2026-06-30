@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>スキル・プロフィール登録｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-seeker">
+
+  <div id="header">
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="index.html">
+          <span class="mark">🏥</span>
+          メディスポット
+        </a>
+        <nav>
+          <span class="role-badge seeker">求職者：佐藤 花子</span>
+          <a href="seeker-home.html">マイページ</a>
+          <a href="seeker-profile.html" class="active">プロフィール</a>
+          <a href="seeker-resume.html">履歴書・職歴</a>
+          <a href="seeker-jobs.html">求人検索</a>
+          <a href="#" onclick="logout();return false;">ログアウト</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <div class="container narrow">
+    <h1 class="page-title">スキル・プロフィール登録</h1>
+    <p class="page-lead">入力した内容は応募時に医療機関へ提示されます。</p>
+
+    <!-- 保存成功通知 -->
+    <div class="notice success" id="saved" style="display:none;">
+      ✅ プロフィールを保存しました。
+      <a href="seeker-jobs.html">求人を探す</a>
+    </div>
+
+    <form class="card" onsubmit="return save(event)">
+
+      <!-- 保有資格（職種） -->
+      <div class="field">
+        <label>
+          保有資格（職種）
+          <span class="req">必須</span>
+        </label>
+        <select id="fCategory" required>
+          <option selected>看護師</option>
+          <option>保健師</option>
+          <option>助産師</option>
+          <option>臨床検査技師</option>
+          <option>放射線技師</option>
+          <option>理学療法士（PT）</option>
+          <option>作業療法士（OT）</option>
+          <option>言語聴覚士（ST）</option>
+          <option>ヘルパー</option>
+        </select>
+      </div>
+
+      <!-- 資格名称（詳細） -->
+      <div class="field">
+        <label>資格名称（詳細）</label>
+        <input type="text" id="fLicense" placeholder="例）正看護師、認定看護師（感染管理）など">
+      </div>
+
+      <!-- 生年月日 / 実務経験年数 -->
+      <div class="grid-2">
+        <div class="field">
+          <label>
+            生年月日
+            <span class="req">必須</span>
+          </label>
+          <input type="date" id="fBirthdate" required
+            onchange="updateAge()"
+            max="2025-12-31"
+            min="1940-01-01">
+          <p class="hint" id="ageDisplay">年齢：34歳（生年月日から自動計算）</p>
+        </div>
+        <div class="field">
+          <label>実務経験年数</label>
+          <select id="fExperience">
+            <option value="">選択してください</option>
+            <option>1年未満</option>
+            <option>1〜3年</option>
+            <option>4〜6年</option>
+            <option>7〜9年</option>
+            <option>10〜15年</option>
+            <option>16年以上</option>
+          </select>
+          <p class="hint">上記で選択した資格・職種での実務経験年数を選んでください。</p>
+        </div>
+      </div>
+
+      <!-- スキル・経験（複数選択可） -->
+      <div class="field">
+        <label>スキル・経験（複数選択可）</label>
+        <p class="hint" style="margin-top:0; margin-bottom:8px;">選択中の職種に応じた項目が表示されます。</p>
+        <div class="checks" id="skillChecks">
+          <label>
+            <input type="checkbox" value="一般病棟" checked onchange="syncOther()">
+            一般病棟
+          </label>
+          <label>
+            <input type="checkbox" value="ICU/CCU" onchange="syncOther()">
+            ICU/CCU
+          </label>
+          <label>
+            <input type="checkbox" value="クリニック" checked onchange="syncOther()">
+            クリニック
+          </label>
+          <label>
+            <input type="checkbox" value="健康診断施設" onchange="syncOther()">
+            健康診断施設
+          </label>
+          <label>
+            <input type="checkbox" value="訪問看護" onchange="syncOther()">
+            訪問看護
+          </label>
+          <label>
+            <input type="checkbox" value="高齢者施設" onchange="syncOther()">
+            高齢者施設
+          </label>
+          <label>
+            <input type="checkbox" value="その他（自由記載）" onchange="syncOther()">
+            その他（自由記載）
+          </label>
+        </div>
+        <input type="text" id="fSkillOther"
+          placeholder="その他の内容を入力してください"
+          style="display:none; margin-top:8px;">
+      </div>
+
+      <!-- 希望雇用形態 -->
+      <div class="field">
+        <label>希望雇用形態</label>
+        <select id="fDesiredType">
+          <option value="">こだわらない</option>
+          <option selected>スポット（単発）</option>
+          <option>業務委託</option>
+        </select>
+      </div>
+
+      <!-- 居住地（郵便番号から検索） -->
+      <div class="field">
+        <label>居住地（郵便番号から検索）</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="fZipcode" inputmode="numeric" maxlength="8"
+            placeholder="例）1500001" style="flex:1;">
+          <button type="button" class="btn outline" id="zipBtn" onclick="lookupZip()">住所を検索</button>
+        </div>
+        <p class="hint" id="zipMsg"></p>
+        <select id="fResidence" style="margin-top:8px;">
+          <option selected>東京都世田谷区池尻</option>
+        </select>
+      </div>
+
+      <!-- 自己PR -->
+      <div class="field">
+        <label>自己PR</label>
+        <textarea id="fPr" placeholder="経歴の概要や希望条件を自由にご記入ください。"></textarea>
+      </div>
+
+      <!-- 資格証の画像アップロード -->
+      <div class="field">
+        <label>資格証の画像アップロード（複数可）</label>
+        <div class="upload-box has" id="certBox" onclick="document.getElementById('fCert').click()">
+          クリックして資格証（免許証）の画像をアップロード
+          <br>
+          （JPG / PNG・複数選択できます）
+        </div>
+        <input type="file" id="fCert" accept="image/*" multiple
+          style="display:none;" onchange="onCertSelected(event)">
+        <div id="certList" style="margin-top:10px;">
+          <div class="repeat-row" style="align-items:center;">
+            <span style="flex:1;">🔒 看護師免許証.jpg
+              <span style="font-size:12px; color:var(--muted);">（登録日 2026/06/10）</span>
+            </span>
+            <button type="button" class="btn small danger" onclick="removeCert(0)">削除</button>
+          </div>
+          <div class="repeat-row" style="align-items:center;">
+            <span style="flex:1;">🔒 BLSプロバイダーカード.jpg
+              <span style="font-size:12px; color:var(--muted);">（登録日 2026/06/10）</span>
+            </span>
+            <button type="button" class="btn small danger" onclick="removeCert(1)">削除</button>
+          </div>
+        </div>
+        <p class="hint">医療資格の証明として、免許証・資格証の画像を複数登録できます。応募時に医療機関へ提示されます。※プロトタイプのためファイル名のみ保存します（モック）。</p>
+      </div>
+
+      <button type="submit" class="btn block">プロフィールを保存する</button>
+    </form>
+  </div>
+
+  <div id="footer">
+    <footer class="site-footer">
+      " 医療特化型広告マッチングシステム プロトタイプ V1 ／ "
+      <a href="#" onclick="resetDB();return false;">デモデータを初期化</a>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const me = requireRole('seeker');
+    if (me) {
+      renderHeader('seeker-profile.html');
+      renderFooter();
+
+      const p = me.profile || {};
+
+      // 保有資格（職種）セレクト描画
+      document.getElementById('fCategory').innerHTML =
+        getCategories().map(c =>
+          `<option ${c === p.category ? 'selected' : ''}>${c}</option>`
+        ).join('');
+
+      // 希望雇用形態（常勤・非常勤を除外）
+      const DESIRED_TYPES = EMPLOYMENT_TYPES.filter(t => t !== '常勤' && t !== '非常勤');
+      document.getElementById('fDesiredType').innerHTML +=
+        DESIRED_TYPES.map(t =>
+          `<option ${t === p.desiredType ? 'selected' : ''}>${t}</option>`
+        ).join('');
+
+      // スキル候補描画（職種変更時は選択済みのうち候補に残るものだけ引き継ぐ）
+      const otherInput = document.getElementById('fSkillOther');
+
+      function renderSkills(category, checkedSkills, otherText) {
+        const skills = skillsFor(category);
+        document.getElementById('skillChecks').innerHTML = skills.map(s =>
+          `<label><input type="checkbox" value="${esc(s)}" ${
+            checkedSkills.includes(s) ? 'checked' : ''
+          } onchange="syncOther()">${esc(s)}</label>`
+        ).join('');
+        otherInput.value = otherText || '';
+        syncOther();
+      }
+
+      window.syncOther = function () {
+        const otherChecked = [...document.querySelectorAll('#skillChecks input:checked')]
+          .some(i => i.value === SKILL_OTHER);
+        otherInput.style.display = otherChecked ? '' : 'none';
+        if (!otherChecked) otherInput.value = '';
+      };
+
+      // 初期描画（保存済みのスキル・その他を反映）
+      renderSkills(
+        p.category || getCategories()[0],
+        (p.skills || []).concat(p.skillOther ? [SKILL_OTHER] : []),
+        p.skillOther
+      );
+
+      // 職種変更時に再描画
+      document.getElementById('fCategory').addEventListener('change', function () {
+        const cur = [...document.querySelectorAll('#skillChecks input:checked')].map(i => i.value);
+        renderSkills(this.value, cur, otherInput.value);
+      });
+
+      // 生年月日 → 年齢の自動計算・表示
+      window.updateAge = function () {
+        const age = calcAge(document.getElementById('fBirthdate').value);
+        document.getElementById('ageDisplay').textContent =
+          age === null
+            ? '生年月日から年齢を自動計算します。'
+            : `年齢：${age}歳（生年月日から自動計算）`;
+      };
+
+      document.getElementById('fBirthdate').value = p.birthdate || '';
+      updateAge();
+
+      document.getElementById('fLicense').value = p.license || '';
+      document.getElementById('fExperience').value = p.experience || '';
+      document.getElementById('fPr').value = p.pr || '';
+
+      // 資格証アップロード（モック：ファイル名のみ保存。複数登録可）
+      let certList = Array.isArray(me.certificates)
+        ? me.certificates.slice()
+        : (me.certificate ? [me.certificate] : []);
+
+      function renderCert() {
+        const box = document.getElementById('certBox');
+        box.classList.toggle('has', certList.length > 0);
+        document.getElementById('certList').innerHTML = certList.length === 0
+          ? '<p style="font-size:13px; color:var(--muted);">まだ資格証が登録されていません。</p>'
+          : certList.map((c, i) =>
+            `<div class="repeat-row" style="align-items:center;">
+              <span style="flex:1;">🔒 ${esc(c.name)}
+                <span style="font-size:12px; color:var(--muted);">（登録日 ${esc(c.uploadedAt)}）</span>
+              </span>
+              <button type="button" class="btn small danger" onclick="removeCert(${i})">削除</button>
+            </div>`
+          ).join('');
+      }
+
+      renderCert();
+
+      window.onCertSelected = function (e) {
+        [...e.target.files].forEach(file =>
+          certList.push({ name: file.name, uploadedAt: nowStr() })
+        );
+        e.target.value = '';
+        renderCert();
+      };
+
+      window.removeCert = function (i) {
+        certList.splice(i, 1);
+        renderCert();
+      };
+
+      // 保存済みの居住地を復元
+      const zipSel = document.getElementById('fResidence');
+      if (p.residence) {
+        document.getElementById('fZipcode').value = p.zipcode || '';
+        zipSel.innerHTML = `<option selected>${p.residence}</option>`;
+        zipSel.style.display = '';
+      }
+
+      // 郵便番号から住所候補を検索（zipcloud API）
+      window.lookupZip = async function () {
+        const msg = document.getElementById('zipMsg');
+        const btn = document.getElementById('zipBtn');
+        const zip = document.getElementById('fZipcode').value.replace(/[^0-9]/g, '');
+        if (zip.length !== 7) {
+          msg.textContent = '郵便番号は7桁の数字で入力してください（例：1500001）。';
+          return;
+        }
+        btn.disabled = true;
+        msg.textContent = '検索中…';
+        try {
+          const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zip}`);
+          const data = await res.json();
+          if (!data.results || data.results.length === 0) {
+            msg.textContent = '該当する住所が見つかりませんでした。郵便番号をご確認ください。';
+            zipSel.style.display = 'none';
+            return;
+          }
+          const opts = data.results.map(r => `${r.address1}${r.address2}${r.address3}`);
+          zipSel.innerHTML = opts.map(o => `<option>${o}</option>`).join('');
+          zipSel.style.display = '';
+          msg.textContent = opts.length > 1
+            ? '該当する住所が複数あります。お住まいの地域を選択してください。'
+            : '住所を取得しました。';
+        } catch (e) {
+          msg.textContent = '住所の検索に失敗しました。通信環境をご確認のうえ再度お試しください。';
+        } finally {
+          btn.disabled = false;
+        }
+      };
+
+      // 保存処理
+      function save(e) {
+        e.preventDefault();
+        const db = loadDB();
+        const user = getUser(db, me.id);
+        const resSel = document.getElementById('fResidence');
+        user.profile = {
+          category: document.getElementById('fCategory').value,
+          license: document.getElementById('fLicense').value.trim(),
+          birthdate: document.getElementById('fBirthdate').value,
+          experience: document.getElementById('fExperience').value,
+          skills: [...document.querySelectorAll('#skillChecks input:checked')]
+            .map(i => i.value)
+            .filter(v => v !== SKILL_OTHER),
+          skillOther: [...document.querySelectorAll('#skillChecks input:checked')]
+            .some(i => i.value === SKILL_OTHER)
+            ? document.getElementById('fSkillOther').value.trim()
+            : '',
+          desiredType: document.getElementById('fDesiredType').value,
+          zipcode: document.getElementById('fZipcode').value.replace(/[^0-9]/g, ''),
+          residence: resSel.style.display === 'none' ? '' : resSel.value,
+          pr: document.getElementById('fPr').value.trim(),
+        };
+        user.certificates = certList;
+        delete user.certificate;
+        saveDB(db);
+        document.getElementById('saved').style.display = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      }
+    }
+  </script>
+</body>
+</html>

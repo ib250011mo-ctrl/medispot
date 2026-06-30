@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>求職者マイページ｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-seeker">
+
+  <div id="header">
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="index.html">
+          <span class="mark">🏥</span>
+          メディスポット
+        </a>
+        <nav>
+          <span class="role-badge seeker">求職者：佐藤 花子</span>
+          <a href="seeker-home.html" class="active">マイページ</a>
+          <a href="seeker-profile.html">プロフィール</a>
+          <a href="seeker-resume.html">履歴書・職歴</a>
+          <a href="seeker-jobs.html">求人検索</a>
+          <a href="#" onclick="logout();return false;">ログアウト</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <div class="container">
+    <h1 class="page-title" id="welcome">ようこそ、佐藤 花子 さん</h1>
+    <p class="page-lead">求職者マイページ（ホーム）</p>
+
+    <!-- マッチング通知エリア -->
+    <div id="matchNotices"></div>
+
+    <!-- ダッシュボード統計カード -->
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="num" id="cntApplied" style="color:var(--seeker)">1</div>
+        <div class="label">応募中の求人</div>
+      </div>
+      <div class="dash-card">
+        <div class="num" id="cntMatched" style="color:var(--match)">0</div>
+        <div class="label">マッチング成立</div>
+      </div>
+      <div class="dash-card">
+        <div class="num" id="cntOpen" style="color:var(--employer)">7</div>
+        <div class="label">掲載中の求人</div>
+      </div>
+    </div>
+
+    <!-- メニューグリッド -->
+    <div class="menu-grid" style="margin-bottom:28px;">
+      <a class="menu-link" href="seeker-profile.html">
+        <span class="icon">📋</span>
+        <span>
+          <h3>スキル・プロフィール登録</h3>
+          <p>資格・経験・希望条件・資格証を登録</p>
+        </span>
+      </a>
+      <a class="menu-link" href="seeker-resume.html">
+        <span class="icon">📄</span>
+        <span>
+          <h3>履歴書・職務経歴書</h3>
+          <p>学歴・職歴・免許資格・自己PRを登録</p>
+        </span>
+      </a>
+      <a class="menu-link" href="seeker-jobs.html">
+        <span class="icon">🔍</span>
+        <span>
+          <h3>求人検索・一覧</h3>
+          <p>職種・雇用形態・キーワードで求人を探す</p>
+        </span>
+      </a>
+    </div>
+
+    <!-- 応募履歴 -->
+    <div class="card">
+      <h2 style="font-size:17px; margin-bottom:14px;">応募履歴</h2>
+      <div id="appList">
+        <table class="list">
+          <tbody>
+            <tr>
+              <th>応募日時</th>
+              <th>求人</th>
+              <th>医療機関</th>
+              <th>ステータス</th>
+              <th></th>
+            </tr>
+            <tr>
+              <td>2026/06/09 10:30</td>
+              <td>【日勤のみ】外来看護師（ブランクOK・週3日〜）</td>
+              <td>ブランチ総合クリニック</td>
+              <td>
+                <span class="status applied">応募済み</span>
+              </td>
+              <td>
+                <a href="seeker-job-detail.html?id=job-1">詳細</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <footer class="site-footer">
+      " 医療特化型広告マッチングシステム プロトタイプ V1 ／ "
+      <a href="#" onclick="resetDB();return false;">デモデータを初期化</a>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const me = requireRole('seeker');
+    if (me) {
+      renderHeader('seeker-home.html');
+      renderFooter();
+      document.getElementById('welcome').textContent = `ようこそ、${me.name} さん`;
+
+      const db = loadDB();
+      const apps = applicationsForSeeker(db, me.id).slice().reverse();
+      const matches = matchesForUser(db, me.id);
+
+      // 統計カード更新
+      document.getElementById('cntApplied').textContent =
+        apps.filter(a => a.status !== 'matched' && a.status !== 'rejected').length;
+      document.getElementById('cntMatched').textContent = matches.length;
+      document.getElementById('cntOpen').textContent =
+        db.jobs.filter(j => j.status === 'open').length;
+
+      // マッチング成立通知
+      document.getElementById('matchNotices').innerHTML = matches.map(m => {
+        const job = getJob(db, m.jobId);
+        const emp = getUser(db, m.employerId);
+        return `<div class="notice match">🎉 <strong>${esc(emp.org_name)}</strong>
+「${esc(job.title)}」とのマッチングが成立しました！
+<a href="match-complete.html?matchId=${m.id}">通知を確認</a> /
+<a href="chat.html?matchId=${m.id}">チャットルームへ</a></div>`;
+      }).join('');
+
+      // 応募履歴
+      const list = document.getElementById('appList');
+      if (apps.length === 0) {
+        list.innerHTML = `<div class="empty"><span class="icon">🔖</span>まだ応募がありません。
+<a href="seeker-jobs.html">求人を探してみましょう</a></div>`;
+      } else {
+        list.innerHTML = `<table class="list">
+<tr><th>応募日時</th><th>求人</th><th>医療機関</th><th>ステータス</th><th></th></tr>
+${apps.map(a => {
+  const job = getJob(db, a.jobId);
+  const emp = getUser(db, job.employerId);
+  const m = db.matches.find(x => x.applicationId === a.id);
+  const action = m
+    ? `<a href="chat.html?matchId=${m.id}">💬 チャット</a>`
+    : `<a href="seeker-job-detail.html?id=${job.id}">詳細</a>`;
+  return `<tr><td>${esc(a.createdAt)}</td><td>${esc(job.title)}</td>
+<td>${esc(emp.org_name)}</td><td>${statusBadge(a.status)}</td><td>${action}</td></tr>`;
+}).join('')}
+</table>`;
+      }
+    }
+  </script>
+</body>
+</html>

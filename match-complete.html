@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>マッチング成立｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container narrow">
+  <div class="card done-hero match">
+    <div class="icon">🎉</div>
+    <h1>マッチングが成立しました！</h1>
+    <p id="matchInfo"></p>
+  </div>
+
+  <!-- マッチング完了通知（メール）のモック -->
+  <div class="card" id="mailMock">
+    <h2 style="font-size:15px; margin-bottom:12px;">📧 マッチング完了通知（メール送信イメージ）</h2>
+    <div style="border:1px solid var(--line); border-radius:8px; padding:16px; font-size:13px; background:#fafafa;">
+      <p style="border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px;">
+        <strong>件名：</strong>【メディスポット】マッチング成立のお知らせ<br>
+        <strong>宛先：</strong><span id="mailTo">employer@example.com</span>
+      </p>
+      <div id="mailBody" style="white-space:pre-wrap;">…</div>
+    </div>
+  </div>
+
+  <div class="menu-grid">
+    <a class="menu-link" id="chatLink" href="chat.html?matchId=match-1">
+      <span class="icon">💬</span>
+      <span>
+        <h3>専用チャットルーム</h3>
+        <p>連絡先が開示されています。条件の詳細を相談しましょう</p>
+      </span>
+    </a>
+    <a class="menu-link" href="#" onclick="dlContract(); return false;">
+      <span class="icon">📄</span>
+      <span>
+        <h3>契約書テンプレートのダウンロード</h3>
+        <p>雇用契約書のひな形をダウンロードできます</p>
+      </span>
+    </a>
+  </div>
+
+  <p style="text-align:center; margin-top:24px;">
+    <a class="btn outline" id="homeLink" href="employer-home.html">マイページへ戻る</a>
+  </p>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = currentUser();
+  if (!me) { location.href = 'login.html'; }
+  else {
+    renderHeader('');
+    renderFooter();
+
+    const db = loadDB();
+    const match = getMatch(db, qs('matchId'));
+
+    if (!match || (match.seekerId !== me.id && match.employerId !== me.id)) {
+      document.querySelector('.container').innerHTML =
+        `<div class="card empty"><span class="icon">⚠️</span>マッチング情報が見つかりませんでした。</div>`;
+    } else {
+      const job = getJob(db, match.jobId);
+      const seeker = getUser(db, match.seekerId);
+      const employer = getUser(db, match.employerId);
+
+      document.getElementById('matchInfo').innerHTML =
+        `求人「<strong>${esc(job.title)}</strong>」について、<br><strong>${esc(employer.org.name)}</strong> と <strong>${esc(seeker.name)}</strong> さんのマッチングが成立しました。 (${esc(match.createdAt)})`;
+
+      document.getElementById('mailTo').textContent =
+        me.role === 'seeker' ? seeker.email : employer.email;
+
+      document.getElementById('mailBody').textContent = [
+        `${me.role === 'seeker' ? seeker.name + ' 様' : employer.org.name + ' ご担当者様'}`,
+        '',
+        'メディスポットをご利用いただきありがとうございます。',
+        `求人「${job.title}」のマッチングが成立しましたのでお知らせします。`,
+        '',
+        '今後は専用チャットルームにて、勤務開始日・契約条件の詳細をご相談ください。',
+        '契約書テンプレートもマイページからダウンロードいただけます。',
+        '',
+        '─────────────',
+        'メディスポット運営事務局',
+      ].join('\n');
+
+      document.getElementById('chatLink').href = `chat.html?matchId=${match.id}`;
+      document.getElementById('homeLink').href = me.role === 'seeker' ? 'seeker-home.html' : 'employer-home.html';
+      window.dlContract = () => downloadContract(match.id);
+    }
+  }
+</script>
+</body>
+</html>

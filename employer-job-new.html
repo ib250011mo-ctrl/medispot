@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>求人広告 新規作成｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-employer">
+
+<div id="header"></div>
+
+<div class="container narrow">
+  <h1 class="page-title">求人広告 新規作成</h1>
+  <p class="page-lead">掲載は無料です。採用が決定した時点で成功報酬（¥55,000 税込）が発生します。</p>
+
+  <form class="card" onsubmit="return save(event)">
+
+    <div class="field">
+      <label>求人タイトル <span class="req">必須</span></label>
+      <input type="text" id="fTitle" placeholder="例）【日勤のみ】外来看護師（週3日〜）" required>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>募集職種 <span class="req">必須</span></label>
+        <select id="fCategory" required></select>
+      </div>
+      <div class="field">
+        <label>雇用形態 <span class="req">必須</span></label>
+        <select id="fType" required></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>給与 <span class="req">必須</span></label>
+      <input type="text" id="fSalary" placeholder="例）時給 2,200円〜2,600円／月給 28万円〜" required>
+    </div>
+
+    <div class="field">
+      <label>勤務地 <span class="req">必須</span></label>
+      <input type="text" id="fLocation" placeholder="例）東京都世田谷区" required>
+    </div>
+
+    <div class="field">
+      <label>仕事内容 <span class="req">必須</span></label>
+      <textarea id="fDescription" placeholder="業務内容、勤務時間、職場環境などをご記入ください。" required></textarea>
+    </div>
+
+    <div class="field">
+      <label>応募要件</label>
+      <textarea id="fRequirements" placeholder="必要な資格・経験などをご記入ください。"></textarea>
+    </div>
+
+    <button type="submit" class="btn green block">この内容で掲載する</button>
+  </form>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('employer');
+  if (me) {
+    renderHeader('employer-job-new.html');
+    renderFooter();
+
+    document.getElementById('fCategory').innerHTML = getCategories().map(c => `<option>${c}</option>`).join('');
+    document.getElementById('fType').innerHTML = EMPLOYMENT_TYPES.map(t => `<option>${t}</option>`).join('');
+
+    function save(e) {
+      e.preventDefault();
+      const db = loadDB();
+      db.jobs.push({
+        id: uid(),
+        employerId: me.id,
+        title: document.getElementById('fTitle').value.trim(),
+        category: document.getElementById('fCategory').value,
+        type: document.getElementById('fType').value,
+        salary: document.getElementById('fSalary').value.trim(),
+        location: document.getElementById('fLocation').value.trim(),
+        description: document.getElementById('fDescription').value.trim(),
+        requirements: document.getElementById('fRequirements').value.trim(),
+        status: 'open',
+        createdAt: new Date().toLocaleDateString('ja-JP'),
+      });
+      saveDB(db);
+      location.href = 'employer-jobs.html?created=1';
+      return false;
+    }
+  }
+</script>
+</body>
+</html>

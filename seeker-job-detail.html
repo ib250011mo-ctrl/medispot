@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>求人詳細｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-seeker">
+
+  <div id="header">
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="index.html">
+          <span class="mark">🏥</span>
+          メディスポット
+        </a>
+        <nav>
+          <span class="role-badge seeker">求職者：佐藤 花子</span>
+          <a href="seeker-home.html">マイページ</a>
+          <a href="seeker-profile.html">プロフィール</a>
+          <a href="seeker-resume.html">履歴書・職歴</a>
+          <a href="seeker-jobs.html" class="active">求人検索</a>
+          <a href="#" onclick="logout();return false;">ログアウト</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <div class="container narrow">
+    <p style="margin-bottom:16px;">
+      <a href="seeker-jobs.html">← 求人一覧へ戻る</a>
+    </p>
+
+    <div id="detail"></div>
+  </div>
+
+  <div id="footer">
+    <footer class="site-footer">
+      " 医療特化型広告マッチングシステム プロトタイプ V1 ／ "
+      <a href="#" onclick="resetDB();return false;">デモデータを初期化</a>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const me = requireRole('seeker');
+    if (me) {
+      renderHeader('seeker-jobs.html');
+      renderFooter();
+
+      const db = loadDB();
+      const job = getJob(db, qs('id'));
+      const el = document.getElementById('detail');
+
+      if (!job) {
+        el.innerHTML = `<div class="card empty"><span class="icon">⚠️</span>求人が見つかりませんでした。</div>`;
+      } else {
+        const emp = getUser(db, job.employerId);
+        const myApp = applicationsForSeeker(db, me.id).find(a => a.jobId === job.id);
+
+        el.innerHTML = `
+          <div class="card">
+            <div class="job-meta" style="margin-bottom:10px;">
+              <span class="tag cat">${esc(job.category)}</span>
+              <span class="tag">${esc(job.type)}</span>
+              ${statusBadge(job.status)}
+            </div>
+            <h1 style="font-size:21px; margin-bottom:6px;">${esc(job.title)}</h1>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">🏥
+              ${esc(emp.org_name)}（${esc(emp.org_facility)}）　掲載日：${esc(job.createdAt)}
+            </p>
+            <dl class="dl">
+              <dt>仕事内容</dt><dd>${esc(job.description)}</dd>
+              <dt>応募要件</dt><dd>${esc(job.requirements)}</dd>
+              <dt>給与</dt><dd>${esc(job.salary)}</dd>
+              <dt>雇用形態</dt><dd>${esc(job.type)}</dd>
+              <dt>勤務地</dt><dd>${esc(job.location)}</dd>
+              <dt>医療機関</dt><dd>${esc(emp.org_name)}¥n${esc(emp.org_intro || '')}</dd>
+            </dl>
+          </div>
+
+          <!-- 応募確認 -->
+          <div class="card" id="applyBox" style="display:none;">
+            <h2 style="font-size:17px; margin-bottom:12px;">この求人に応募する（応募確認）</h2>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+              応募すると、登録済みのプロフィールが医療機関へ提示されます。
+              <a href="seeker-profile.html">プロフィールを確認・編集する</a>
+            </p>
+            <div class="field">
+              <label>応募メッセージ（任意）</label>
+              <textarea id="fMessage" placeholder="志望理由や希望条件があればご記入ください。"></textarea>
+            </div>
+            <button class="btn block" onclick="apply()">応募を確定する</button>
+          </div>
+        `;
+
+        if (myApp) {
+          el.insertAdjacentHTML('beforeend',
+            `<div class="notice info">この求人には応募済みです（${esc(myApp.createdAt)}）。現在のステータス：${statusBadge(myApp.status)}</div>`
+          );
+        } else if (job.status === 'open') {
+          document.getElementById('applyBox').style.display = '';
+        } else {
+          el.insertAdjacentHTML('beforeend',
+            `<div class="notice info">この求人は掲載を終了しています。</div>`
+          );
+        }
+
+        window.apply = function () {
+          if (!confirm(`「${job.title}」に応募します。よろしいですか？`)) return;
+          const db2 = loadDB();
+          db2.applications.push({
+            id: uid(),
+            jobId: job.id,
+            seekerId: me.id,
+            status: 'applied',
+            message: document.getElementById('fMessage').value.trim(),
+            createdAt: nowStr(),
+          });
+          saveDB(db2);
+          location.href = `seeker-apply-complete.html?jobId=${job.id}`;
+        };
+      }
+    }
+  </script>
+</body>
+</html>

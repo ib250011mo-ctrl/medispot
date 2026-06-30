@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=Parisienne&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Noto Sans JP',sans-serif;color:#4a4a47;background:#f1f0ea;line-height:1.9;font-size:15px;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+  a{text-decoration:none;color:inherit}
+  input,select,textarea{font-family:'Noto Sans JP',sans-serif}
+
+  /* ── Mobile overrides ── */
+  @media(max-width:768px){
+    .nav-links{display:none!important}
+    .mob-menu-btn{display:flex!important}
+    .hero-inner{flex-direction:column!important;padding:48px 20px 40px!important;gap:32px!important}
+    .hero-text{max-width:100%!important}
+    .hero-stats{grid-template-columns:1fr 1fr!important;gap:10px!important}
+    .voice-grid{grid-template-columns:1fr!important}
+    .flow-steps{grid-template-columns:1fr 1fr!important}
+    .features-grid{grid-template-columns:1fr!important}
+    .form-card{padding:28px 20px!important}
+    .section-pad{padding:48px 20px!important}
+    .cta-band-inner{flex-direction:column!important;text-align:center!important;gap:18px!important}
+    .footer-nav{flex-direction:column!important;gap:12px!important;align-items:center!important}
+    .price-grid{grid-template-columns:1fr!important}
+    .form-row{grid-template-columns:1fr!important}
+  }
+  @media(max-width:480px){
+    .hero-title{font-size:22px!important;line-height:1.65!important}
+    .section-heading{font-size:22px!important}
+    .hero-stats{grid-template-columns:1fr!important}
+    .flow-steps{grid-template-columns:1fr!important}
+  }
+</style>
+</helmet>
+
+<!-- HEADER -->
+<header style="position:sticky;top:0;z-index:50;background:rgba(241,240,234,.94);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,.07)">
+  <div style="max-width:1240px;margin:0 auto;padding:0 32px;height:74px;display:flex;align-items:center;justify-content:space-between">
+    <a href="index.html" style="display:flex;align-items:center;gap:11px">
+      <svg viewBox="0 0 40 40" style="width:34px;height:34px;flex:none">
+        <path d="M20 23 C21 30 24 33 29 35" fill="none" stroke="#8aae3e" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="15" cy="15" r="8" fill="#7cb342"/><circle cx="25" cy="15" r="8" fill="#a4cf57"/>
+        <circle cx="15" cy="25" r="8" fill="#b2d566"/><circle cx="25" cy="25" r="8" fill="#6aa830"/>
+      </svg>
+      <span style="display:flex;flex-direction:column;line-height:1.15">
+        <span style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:20px;letter-spacing:.04em;color:#4a8a2c">メディスポット</span>
+        <span style="font-size:10.5px;letter-spacing:.16em;color:#8a8a84">医療の出会いに、安心を。</span>
+      </span>
+    </a>
+    <nav class="nav-links" style="display:flex;align-items:center;gap:22px">
+      <a href="index.html" style="font-size:13.5px;font-weight:500;color:#5a5a54;letter-spacing:.04em">トップページ</a>
+      <a href="#features" style="font-size:13.5px;font-weight:500;color:#5a5a54;letter-spacing:.04em">サービス内容</a>
+      <a href="#flow" style="font-size:13.5px;font-weight:500;color:#5a5a54;letter-spacing:.04em">利用の流れ</a>
+      <a href="#register-form" style="font-size:13px;font-weight:600;color:#fff;background:#e0796b;border-radius:4px;padding:9px 17px;letter-spacing:.04em;box-shadow:0 4px 12px rgba(224,121,107,.28)">無料で掲載する</a>
+      <a href="login.html" style="font-size:13px;font-weight:600;color:#c96553;border:1.5px solid #e0796b;border-radius:4px;padding:8px 16px;letter-spacing:.04em">ログイン</a>
+    </nav>
+    <button class="mob-menu-btn" style="display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px" onClick="{{ toggleMenu }}">
+      <span style="display:block;width:22px;height:2px;background:#5a5a54;border-radius:2px"></span>
+      <span style="display:block;width:22px;height:2px;background:#5a5a54;border-radius:2px"></span>
+      <span style="display:block;width:22px;height:2px;background:#5a5a54;border-radius:2px"></span>
+    </button>
+  </div>
+  <!-- Mobile dropdown -->
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background:rgba(241,240,234,.98);border-top:1px solid rgba(0,0,0,.07);padding:18px 24px;display:flex;flex-direction:column;gap:14px">
+      <a href="index.html" style="font-size:14px;font-weight:500;color:#5a5a54">トップページ</a>
+      <a href="#features" style="font-size:14px;font-weight:500;color:#5a5a54" onClick="{{ closeMenu }}">サービス内容</a>
+      <a href="#flow" style="font-size:14px;font-weight:500;color:#5a5a54" onClick="{{ closeMenu }}">利用の流れ</a>
+      <a href="#register-form" style="font-size:14px;font-weight:700;color:#fff;background:#e0796b;border-radius:6px;padding:11px 16px;text-align:center" onClick="{{ closeMenu }}">無料で掲載する</a>
+      <a href="login.html" style="font-size:14px;font-weight:500;color:#c96553;text-align:center;border:1.5px solid #e0796b;border-radius:6px;padding:10px 16px">ログイン</a>
+    </div>
+  </sc-if>
+</header>
+
+<!-- HERO -->
+<section style="position:relative;overflow:hidden;background:url('img/employer-hero.png') center/cover no-repeat;">
+  <!-- overlay để chữ đọc rõ -->
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(253,240,236,0.92) 0%,rgba(250,227,220,0.88) 40%,rgba(253,244,232,0.85) 100%);z-index:0"></div>
+  <div class="hero-inner" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:72px 32px 60px;display:flex;align-items:center;gap:48px">
+    <div class="hero-text" style="flex:1;max-width:580px">
+      <span style="display:inline-block;background:#e0796b;color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;padding:7px 16px;border-radius:30px;margin-bottom:20px">求人者（医療機関）専用ページ</span>
+      <h1 class="hero-title" style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:28px;line-height:1.75;color:#4a2020;letter-spacing:.04em">即戦力の医療資格者を、<br>掲載無料で採用できる。<br><span style="color:#e0796b">成功報酬型だから、コスト最適。</span></h1>
+      <p style="font-size:13.5px;line-height:2;color:#7a5a54;margin-top:18px">メディスポットは、病院・クリニック・調剤薬局・介護施設が医療資格者と直接つながれる成功報酬型マッチングサービスです。求人広告掲載は何件でも無料。採用が成立したときだけ費用が発生します。</p>
+      <div style="display:flex;gap:14px;margin-top:28px;flex-wrap:wrap">
+        <a href="#register-form" style="display:inline-flex;align-items:center;gap:8px;background:#e0796b;color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:8px;box-shadow:0 6px 18px rgba(224,121,107,.32);letter-spacing:.04em">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/></svg>
+          無料で求人掲載を始める
+        </a>
+        <a href="#pricing" style="display:inline-flex;align-items:center;gap:7px;color:#e0796b;font-size:14px;font-weight:600;padding:13px 20px;border:1.5px solid #e0796b;border-radius:8px;background:#fff">
+          料金の仕組みを見る
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e0796b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div style="flex:none">
+      <div class="hero-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:280px">
+        <div style="background:#fff;border-radius:12px;padding:20px 16px;text-align:center;box-shadow:0 4px 16px rgba(224,121,107,.1)">
+          <p style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#e0796b;line-height:1">0<span style="font-size:14px">円</span></p>
+          <p style="font-size:11px;color:#9a8a88;margin-top:5px;line-height:1.5">求人掲載<br>初期費用</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px 16px;text-align:center;box-shadow:0 4px 16px rgba(224,121,107,.1)">
+          <p style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#4a8a2c;line-height:1">10,000<span style="font-size:13px">名+</span></p>
+          <p style="font-size:11px;color:#9a8a88;margin-top:5px;line-height:1.5">登録<br>医療資格者</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px 16px;text-align:center;box-shadow:0 4px 16px rgba(224,121,107,.1)">
+          <p style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#e0796b;line-height:1">∞<span style="font-size:14px"></span></p>
+          <p style="font-size:11px;color:#9a8a88;margin-top:5px;line-height:1.5">求人掲載<br>件数制限なし</p>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px 16px;text-align:center;box-shadow:0 4px 16px rgba(224,121,107,.1)">
+          <p style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#4a8a2c;line-height:1">96<span style="font-size:14px">%</span></p>
+          <p style="font-size:11px;color:#9a8a88;margin-top:5px;line-height:1.5">求人者<br>満足度</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FACILITY TAGS BAND -->
+<section style="background:#e0796b;padding:14px 24px">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:1080px;margin:0 auto">
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">病院</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">クリニック（無床）</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">クリニック（有床）</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">調剤薬局</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">介護・福祉施設</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">健診センター</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">訪問看護ステーション</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">老人ホーム</span>
+    <span style="background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.06em">リハビリ施設</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section-pad" style="background:#fff;padding:72px 32px">
+  <div style="max-width:1080px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:46px">
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#e0796b">Why choose us</span>
+      <h2 class="section-heading" style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#4a2020;margin-top:4px;letter-spacing:.06em">メディスポットを選ぶ理由</h2>
+    </div>
+    <div class="features-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="border:1.5px solid #f0d8d2;border-radius:14px;padding:32px 24px;background:#fdf7f5">
+        <div style="width:54px;height:54px;background:#e0796b;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+        <h3 style="font-family:'Noto Serif JP',serif;font-weight:600;font-size:16px;color:#4a2020;margin-bottom:10px">掲載無料・成功報酬のみ</h3>
+        <p style="font-size:12.5px;line-height:1.95;color:#7a5a54">初期費用・月額費用・掲載件数の上限はありません。採用が決定したときにのみ報酬をお支払いいただく安心の料金体系。</p>
+      </div>
+      <div style="border:1.5px solid #f0d8d2;border-radius:14px;padding:32px 24px;background:#fdf7f5">
+        <div style="width:54px;height:54px;background:#e0796b;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 style="font-family:'Noto Serif JP',serif;font-weight:600;font-size:16px;color:#4a2020;margin-bottom:10px">資格・職種で即絞り込み</h3>
+        <p style="font-size:12.5px;line-height:1.95;color:#7a5a54">看護師・検査技師・PT/OT/STなど職種別に人材を検索可能。資格保有済みの即戦力のみが登録しています。</p>
+      </div>
+      <div style="border:1.5px solid #f0d8d2;border-radius:14px;padding:32px 24px;background:#fdf7f5">
+        <div style="width:54px;height:54px;background:#e0796b;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
+        </div>
+        <h3 style="font-family:'Noto Serif JP',serif;font-weight:600;font-size:16px;color:#4a2020;margin-bottom:10px">チャットで直接交渉</h3>
+        <p style="font-size:12.5px;line-height:1.95;color:#7a5a54">応募者とチャットで直接やり取り。条件確認から面接日程の調整まで、ワンストップで対応できます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:#eceae3;padding:64px 32px">
+  <div style="max-width:860px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:40px">
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#e0796b">Pricing</span>
+      <h2 class="section-heading" style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:24px;color:#4a2020;margin-top:4px">シンプルな料金体系</h2>
+    </div>
+    <div class="price-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="background:#fff;border-radius:16px;padding:34px 28px;text-align:center;border:2px solid #f0d8d2">
+        <p style="font-size:13px;color:#e0796b;font-weight:700;letter-spacing:.1em;margin-bottom:8px">掲載・登録・採用前</p>
+        <p style="font-family:'Noto Serif JP',serif;font-size:42px;font-weight:700;color:#4a2020;line-height:1">¥0</p>
+        <p style="font-size:12px;color:#9a8a88;margin-top:6px">完全無料</p>
+        <ul style="margin-top:20px;display:flex;flex-direction:column;gap:9px;text-align:left">
+          <li style="font-size:12.5px;color:#5e5e57;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7cb342" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>会員登録</li>
+          <li style="font-size:12.5px;color:#5e5e57;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7cb342" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>求人広告掲載（件数無制限）</li>
+          <li style="font-size:12.5px;color:#5e5e57;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7cb342" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>候補者のプロフィール閲覧</li>
+          <li style="font-size:12.5px;color:#5e5e57;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7cb342" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>チャット（面接前まで）</li>
+        </ul>
+      </div>
+      <div style="background:#e0796b;border-radius:16px;padding:34px 28px;text-align:center;border:2px solid #e0796b;position:relative;overflow:hidden">
+        <div style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.06em">採用成立時のみ</div>
+        <p style="font-size:13px;color:rgba(255,255,255,.9);font-weight:700;letter-spacing:.1em;margin-bottom:8px">成功報酬</p>
+        <p style="font-family:'Noto Serif JP',serif;font-size:36px;font-weight:700;color:#fff;line-height:1">採用月収<br><span style="font-size:26px">×  1ヶ月分</span></p>
+        <p style="font-size:11.5px;color:rgba(255,255,255,.8);margin-top:8px;line-height:1.6">採用が成立し、連絡先が開示された<br>タイミングでのみ費用が発生します</p>
+        <ul style="margin-top:20px;display:flex;flex-direction:column;gap:9px;text-align:left">
+          <li style="font-size:12.5px;color:rgba(255,255,255,.92);display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>連絡先・個人情報の開示</li>
+          <li style="font-size:12.5px;color:rgba(255,255,255,.92);display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>契約書テンプレート提供</li>
+          <li style="font-size:12.5px;color:rgba(255,255,255,.92);display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>採用後サポート</li>
+        </ul>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:#9a8a88;margin-top:18px">※ 詳細はお問い合わせください。長期採用・複数採用の場合は別途ご相談承ります。</p>
+  </div>
+</section>
+
+<!-- VOICE / TESTIMONIALS -->
+<section style="background:#fff;padding:64px 32px">
+  <div style="max-width:1080px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:40px">
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#e0796b">Client Voices</span>
+      <h2 class="section-heading" style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:24px;color:#4a2020;margin-top:4px">採用担当者の声</h2>
+    </div>
+    <div class="voice-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div style="background:#fdf7f5;border-radius:14px;padding:28px 24px;border:1px solid #f0d8d2">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#e0796b,#d06a5a);display:flex;align-items:center;justify-content:center;flex:none">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#4a2020">ブランチ総合クリニック</p>
+            <p style="font-size:11px;color:#9a8a88">東京都 ／ 採用担当</p>
+          </div>
+        </div>
+        <div style="font-size:20px;color:#e0796b;margin-bottom:8px;line-height:1">"</div>
+        <p style="font-size:12.5px;line-height:1.9;color:#5e5e57">看護師2名の採用に成功しました。プロフィールで資格・経験を事前に確認できるので、選考の精度が大幅に上がりました。</p>
+        <div style="margin-top:14px;display:flex;gap:6px">
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">クリニック</span>
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">看護師採用</span>
+        </div>
+      </div>
+      <div style="background:#fdf7f5;border-radius:14px;padding:28px 24px;border:1px solid #f0d8d2">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#4a8a2c,#7cb342);display:flex;align-items:center;justify-content:center;flex:none">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#4a2020">さくら調剤薬局</p>
+            <p style="font-size:11px;color:#9a8a88">神奈川県 ／ 店長</p>
+          </div>
+        </div>
+        <div style="font-size:20px;color:#e0796b;margin-bottom:8px;line-height:1">"</div>
+        <p style="font-size:12.5px;line-height:1.9;color:#5e5e57">掲載費用ゼロは本当に助かります。小規模薬局にはありがたいサービスです。薬剤師の採用まで1ヶ月でスムーズに進みました。</p>
+        <div style="margin-top:14px;display:flex;gap:6px">
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">調剤薬局</span>
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">薬剤師採用</span>
+        </div>
+      </div>
+      <div style="background:#fdf7f5;border-radius:14px;padding:28px 24px;border:1px solid #f0d8d2">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#e0796b,#4a8a2c);display:flex;align-items:center;justify-content:center;flex:none">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#4a2020">みどり訪問看護ステーション</p>
+            <p style="font-size:11px;color:#9a8a88">埼玉県 ／ 管理者</p>
+          </div>
+        </div>
+        <div style="font-size:20px;color:#e0796b;margin-bottom:8px;line-height:1">"</div>
+        <p style="font-size:12.5px;line-height:1.9;color:#5e5e57">在宅医療に理解がある看護師を探していました。希望条件が細かく登録できるので、チャットで事前確認してから選考に進めました。</p>
+        <div style="margin-top:14px;display:flex;gap:6px">
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">訪問看護</span>
+          <span style="font-size:11px;background:#fdeee9;color:#c96553;padding:3px 10px;border-radius:12px">看護師採用</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section id="flow" class="section-pad" style="background:#eceae3;padding:64px 32px">
+  <div style="max-width:800px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:46px">
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#e0796b">How it works</span>
+      <h2 class="section-heading" style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#4a2020;margin-top:4px;letter-spacing:.05em">ご利用の流れ</h2>
+    </div>
+    <div class="flow-steps" style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative">
+      <div style="position:absolute;top:34px;left:calc(12.5% + 18px);right:calc(12.5% + 18px);height:2px;background:linear-gradient(90deg,#e0796b,#c96553);z-index:0;border-radius:2px"></div>
+      <div style="text-align:center;position:relative;z-index:1">
+        <div style="width:56px;height:56px;border-radius:50%;background:#e0796b;color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 14px rgba(224,121,107,.3)">1</div>
+        <h4 style="font-size:13px;font-weight:700;color:#4a2020;margin-bottom:6px">無料会員登録</h4>
+        <p style="font-size:11.5px;color:#7a7a72;line-height:1.7">医療機関情報・担当者名を入力</p>
+      </div>
+      <div style="text-align:center;position:relative;z-index:1">
+        <div style="width:56px;height:56px;border-radius:50%;background:#e0796b;color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 14px rgba(224,121,107,.3)">2</div>
+        <h4 style="font-size:13px;font-weight:700;color:#4a2020;margin-bottom:6px">求人広告を作成</h4>
+        <p style="font-size:11.5px;color:#7a7a72;line-height:1.7">職種・条件・特徴を入力して掲載</p>
+      </div>
+      <div style="text-align:center;position:relative;z-index:1">
+        <div style="width:56px;height:56px;border-radius:50%;background:#e0796b;color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 14px rgba(224,121,107,.3)">3</div>
+        <h4 style="font-size:13px;font-weight:700;color:#4a2020;margin-bottom:6px">応募者を選考</h4>
+        <p style="font-size:11.5px;color:#7a7a72;line-height:1.7">プロフィール確認・チャットで選考</p>
+      </div>
+      <div style="text-align:center;position:relative;z-index:1">
+        <div style="width:56px;height:56px;border-radius:50%;background:#4a8a2c;color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 14px rgba(74,138,44,.3)">4</div>
+        <h4 style="font-size:13px;font-weight:700;color:#4a2020;margin-bottom:6px">採用決定・決済</h4>
+        <p style="font-size:11.5px;color:#7a7a72;line-height:1.7">成功報酬決済後、連絡先を開示</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION FORM -->
+<section id="register-form" style="background:linear-gradient(160deg,#fdf0ec 0%,#fae3dc 60%,#fdf4e8 100%);padding:72px 24px">
+  <div style="max-width:580px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:36px">
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#e0796b">Join Medispot</span>
+      <h2 style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:26px;color:#4a2020;margin-top:4px;letter-spacing:.06em">求人者として無料登録</h2>
+      <p style="font-size:13px;color:#7a5a54;margin-top:8px">登録・求人掲載・選考まで、すべて無料です。</p>
+    </div>
+    <form class="form-card" style="background:#fff;border-radius:16px;padding:38px 36px;box-shadow:0 8px 32px rgba(224,121,107,.12);border:1px solid rgba(224,121,107,.14)" onsubmit="return false">
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">ご担当者名<span style="color:#e0796b;font-size:10px;margin-left:5px;font-weight:700">必須</span></label>
+        <input type="text" placeholder="例）山田 太郎" style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">医療機関名<span style="color:#e0796b;font-size:10px;margin-left:5px;font-weight:700">必須</span></label>
+        <input type="text" placeholder="例）ブランチ総合クリニック" style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">施設区分<span style="color:#e0796b;font-size:10px;margin-left:5px;font-weight:700">必須</span></label>
+        <select style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;appearance:none;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+          <option value="" disabled selected>施設種別を選択してください</option>
+          <option>病院</option><option>クリニック（無床）</option><option>クリニック（有床）</option>
+          <option>調剤薬局</option><option>介護・福祉施設</option><option>健診センター</option>
+          <option>訪問看護ステーション</option><option>老人ホーム・グループホーム</option><option>その他</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">所在地</label>
+        <input type="text" placeholder="例）東京都世田谷区〇〇1-2-3" style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">メールアドレス<span style="color:#e0796b;font-size:10px;margin-left:5px;font-weight:700">必須</span></label>
+        <input type="email" placeholder="example@hospital.co.jp" style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+      </div>
+
+      <div style="margin-bottom:26px">
+        <label style="display:block;font-size:13px;font-weight:600;color:#4a4a45;margin-bottom:7px">パスワード<span style="color:#e0796b;font-size:10px;margin-left:5px;font-weight:700">必須</span></label>
+        <input type="password" placeholder="8文字以上" style="width:100%;padding:12px 13px;border:1.5px solid #dcdbd2;border-radius:8px;font-size:14px;color:#4a4a47;background:#fbfbf8;outline:none" onfocus="this.style.borderColor='#e0796b';this.style.boxShadow='0 0 0 3px rgba(224,121,107,.12)'" onblur="this.style.borderColor='#dcdbd2';this.style.boxShadow='none'">
+        <p style="font-size:11px;color:#a0a098;margin-top:7px;line-height:1.6">※ プロトタイプのため、実際のパスワードは使用しないでください。</p>
+      </div>
+
+      <button type="submit" style="width:100%;padding:15px;border:none;border-radius:10px;background:#e0796b;color:#fff;font-size:15px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(224,121,107,.32);letter-spacing:.04em">無料で求人掲載を始める</button>
+      <p style="text-align:center;font-size:12px;color:#8a8a82;margin-top:14px">すでにアカウントをお持ちの方は <a href="login.html" style="color:#e0796b;font-weight:600">ログイン</a></p>
+      <p style="text-align:center;font-size:11px;color:#aaa;margin-top:10px;line-height:1.7">登録することで<a href="#" style="color:#7a7a72">利用規約</a>・<a href="#" style="color:#7a7a72">プライバシーポリシー</a>に同意したものとみなします</p>
+    </form>
+
+    <div style="text-align:center;margin-top:24px">
+      <a href="seeker.html" style="font-size:13px;color:#7a7a72">求職者（医療資格者）の方はこちら →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:#fff;border-top:1px solid rgba(0,0,0,.06);padding:32px 32px 28px">
+  <nav class="footer-nav" style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:22px">
+    <a href="index.html" style="font-size:12.5px;color:#5a5a54">ホーム</a>
+    <a href="seeker.html" style="font-size:12.5px;color:#5a5a54">求職者の方へ</a>
+    <a href="employer.html" style="font-size:12.5px;color:#e0796b;font-weight:600">求人者の方へ</a>
+    <a href="login.html" style="font-size:12.5px;color:#5a5a54">ログイン</a>
+  </nav>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+    <span style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:17px;color:#4a8a2c">メディスポット</span>
+    <p style="font-size:12px;color:#9a9a92">医療特化型 求人広告マッチングサービス</p>
+    <p style="font-size:11px;color:#b0b0a8;margin-top:10px;letter-spacing:.06em">© 2026 Medispot Inc.</p>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { menuOpen: false };
+  renderVals() {
+    return {
+      menuOpen: this.state.menuOpen,
+      toggleMenu: () => this.setState({ menuOpen: !this.state.menuOpen }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>

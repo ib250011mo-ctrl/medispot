@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>掲載求人管理・一覧｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-employer">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">掲載求人管理・一覧</h1>
+  <p class="page-lead">掲載中の求人と応募状況を管理します。</p>
+
+  <div class="notice success" id="created" style="display:none;">✅ 求人広告を掲載しました。</div>
+
+  <div style="margin-bottom:16px;">
+    <a class="btn green" href="employer-job-new.html">＋ 求人広告を新規作成</a>
+  </div>
+
+  <div id="jobList"></div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('employer');
+  if (me) {
+    renderHeader('employer-jobs.html');
+    renderFooter();
+    if (qs('created')) document.getElementById('created').style.display = '';
+
+    const db = loadDB();
+    const myJobs = jobsForEmployer(db, me.id).slice().reverse();
+    const el = document.getElementById('jobList');
+
+    if (myJobs.length === 0) {
+      el.innerHTML = `<div class="card empty"><span class="icon">📋</span>掲載中の求人はありません。<a href="employer-job-new.html">求人広告を作成しましょう</a></div>`;
+    } else {
+      el.innerHTML = myJobs.map(j => {
+        const apps = applicationsForJob(db, j.id);
+        const pending = apps.filter(a => a.status === 'applied' || a.status === 'screening').length;
+        const matched = apps.filter(a => a.status === 'matched').length;
+        return `<div class="job-card">
+          <div class="job-meta">
+            <span class="tag cat">${esc(j.category)}</span>
+            <span class="tag">${esc(j.type)}</span>
+            <span class="tag salary">${esc(j.salary)}</span>
+            ${statusBadge(j.status)}
+          </div>
+          <h3>${esc(j.title)}</h3>
+          <div class="foot">
+            <span class="date">掲載日：${esc(j.createdAt)}　|　応募 ${apps.length}件（選考待ち ${pending}件${matched ? `・成立 ${matched}件` : ''}）</span>
+            <span style="display:flex; gap:8px;">
+              <a class="btn small green" href="employer-applicants.html?jobId=${j.id}">👥 応募者一覧（選考）</a>
+              ${j.status === 'open'
+                ? `<button class="btn small outline" onclick="closeJob('${j.id}')">掲載終了</button>`
+                : `<button class="btn small outline" onclick="reopenJob('${j.id}')">再掲載</button>`}
+            </span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  window.closeJob = function (id) {
+    if (!confirm('この求人の掲載を終了しますか？')) return;
+    const db2 = loadDB();
+    getJob(db2, id).status = 'closed';
+    saveDB(db2);
+    location.reload();
+  };
+  window.reopenJob = function (id) {
+    const db2 = loadDB();
+    getJob(db2, id).status = 'open';
+    saveDB(db2);
+    location.reload();
+  };
+</script>
+</body>
+</html>

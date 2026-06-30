@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>専用チャットルーム｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container narrow">
+  <p style="margin-bottom:16px;"><a href="employer-home.html" id="backLink">← マイページへ戻る</a></p>
+  <h1 class="page-title">専用チャットルーム</h1>
+  <p class="page-lead" id="roomInfo">求人「<strong></strong>」｜</p>
+
+  <div class="notice match" id="contactCard" style="font-size:13px;">
+    🔓
+  </div>
+
+  <div class="chat-box">
+    <div class="chat-log" id="chatLog">
+      <div style="text-align:center; font-size:12px; color:var(--muted);">― マッチングが成立しました。こちらのチャットルームで勤務開始日や条件の詳細をご相談ください。 ―</div>
+    </div>
+    <form class="chat-input" onsubmit="return send(event)">
+      <textarea id="fText" placeholder="メッセージを入力… (Enterで改行)"></textarea>
+      <button type="submit" class="btn">送信</button>
+    </form>
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+    <button class="btn outline" onclick="dlContract()">📄 契約書テンプレートをダウンロード</button>
+  </div>
+
+  <p style="font-size:12px; color:var(--muted); margin-top:10px;">
+    💡 デモのヒント：いったんログアウトしてもう一方のデモアカウントでログインすると、相手側からの返信を体験できます。
+  </p>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = currentUser();
+  if (!me) { location.href = 'login.html'; }
+  else {
+    renderHeader('');
+    renderFooter();
+    document.getElementById('backLink').href = me.role === 'seeker' ? 'seeker-home.html' : 'employer-home.html';
+
+    const db = loadDB();
+    const match = getMatch(db, qs('matchId'));
+
+    if (!match || (match.seekerId !== me.id && match.employerId !== me.id)) {
+      document.querySelector('.container').innerHTML =
+        `<div class="card empty"><span class="icon">⚠️</span>チャットルームが見つかりませんでした。マッチング成立後にご利用いただけます。</div>`;
+    } else {
+      const job = getJob(db, match.jobId);
+      const seeker = getUser(db, match.seekerId);
+      const employer = getUser(db, match.employerId);
+      const partner = me.role === 'seeker' ? employer : seeker;
+
+      document.getElementById('roomInfo').innerHTML =
+        `求人「<strong>${esc(job.title)}</strong>」｜${esc(employer.org.name)} × ${esc(seeker.name)} さん`;
+
+      // 連絡先開示（マッチング成立済のみ）
+      document.getElementById('contactCard').innerHTML = me.role === 'seeker'
+        ? `🔓 <strong>連絡先が開示されました</strong> ${esc(employer.org.name)}／担当：${esc(employer.name)} 📍 ${esc(employer.org.address || '-')} ✉ ${esc(employer.email)}`
+        : `🔓 <strong>連絡先が開示されました</strong> ${esc(seeker.name)} さん (${esc(seeker.profile.category)}) ✉ ${esc(seeker.email)}`;
+
+      function renderLog() {
+        const db2 = loadDB();
+        const msgs = db2.messages.filter(m => m.matchId === match.id);
+        const log = document.getElementById('chatLog');
+        log.innerHTML = msgs.map(m => {
+          if (m.senderId === 'system') {
+            return `<div style="text-align:center; font-size:12px; color:var(--muted);">― ${esc(m.text)} ―</div>`;
+          }
+          const sender = getUser(db2, m.senderId);
+          const mine = m.senderId === me.id;
+          const name = sender.role === 'employer' ? sender.org.name : sender.name;
+          return `<div class="msg ${mine ? 'mine' : 'theirs'}">
+            <div class="bubble">${esc(m.text)}</div>
+            <div class="meta">${esc(name)} · ${esc(m.createdAt)}</div>
+          </div>`;
+        }).join('');
+        log.scrollTop = log.scrollHeight;
+      }
+      renderLog();
+
+      window.send = function (e) {
+        e.preventDefault();
+        const text = document.getElementById('fText').value.trim();
+        if (!text) return false;
+        const db2 = loadDB();
+        db2.messages.push({ id: uid(), matchId: match.id, senderId: me.id, text, createdAt: nowStr() });
+        saveDB(db2);
+        document.getElementById('fText').value = '';
+        renderLog();
+        return false;
+      };
+
+      window.dlContract = () => downloadContract(match.id);
+    }
+  }
+</script>
+</body>
+</html>

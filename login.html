@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ログイン｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container narrow">
+  <h1 class="page-title">ログイン</h1>
+  <p class="page-lead">ログイン後、権限（求職者／求人者）に応じたマイページへ移動します。</p>
+
+  <form class="card" onsubmit="return doLogin(event)">
+    <p class="form-error" id="err">メールアドレスまたはパスワードが正しくありません。</p>
+
+    <div class="field">
+      <label>メールアドレス</label>
+      <input type="email" id="fEmail" required autocomplete="username">
+    </div>
+    <div class="field">
+      <label>パスワード</label>
+      <input type="password" id="fPassword" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn block">ログイン</button>
+    <p style="text-align:center; font-size:13px; margin-top:14px;">
+      アカウントをお持ちでない方は <a href="register.html">新規会員登録</a>
+    </p>
+  </form>
+
+  <div class="card">
+    <h3 style="font-size:15px; margin-bottom:10px;">🔑 デモアカウントでログイン</h3>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">プロトタイプ確認用のアカウントです。ワンクリックでログインできます。</p>
+    <div class="grid-2">
+      <button class="btn outline" onclick="demoLogin('seeker@example.com')">👩‍⚕️ 求職者（佐藤 花子／看護師）</button>
+      <button class="btn outline" onclick="demoLogin('employer@example.com')">🏥 求人者（ブランチ総合クリニック）</button>
+    </div>
+    <button class="btn outline block" style="margin-top:12px;" onclick="demoLogin('admin@example.com')">🛠 運営（管理者）でログイン</button>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  renderHeader('login.html');
+  renderFooter();
+
+  function handle(user) {
+    if (user && user.suspended) {
+      const err = document.getElementById('err');
+      err.textContent = 'このアカウントは利用停止中です。運営事務局へお問い合わせください。';
+      err.classList.add('show');
+      return;
+    }
+    if (user) {
+      location.href = homeFor(user.role);
+    } else {
+      const err = document.getElementById('err');
+      err.textContent = 'メールアドレスまたはパスワードが正しくありません。';
+      err.classList.add('show');
+    }
+  }
+
+  function doLogin(e) {
+    e.preventDefault();
+    handle(login(document.getElementById('fEmail').value.trim(), document.getElementById('fPassword').value));
+    return false;
+  }
+
+  function demoLogin(email) {
+    handle(login(email, 'demo1234'));
+  }
+</script>
+</body>
+</html>

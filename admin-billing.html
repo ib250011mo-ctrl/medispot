@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>請求管理｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-admin">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">請求管理</h1>
+  <p class="page-lead">マッチングが成立した案件の利益確認と、請求書の発行を行います。</p>
+
+  <!-- 利益チェック -->
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="sumIncl" style="color:var(--admin); font-size:24px;">¥0</div>
+      <div class="label">売上合計（税込）</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="sumExTax" style="color:var(--admin); font-size:24px;">¥0</div>
+      <div class="label">純売上（税抜・利益）</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="sumTax" style="color:var(--muted); font-size:24px;">¥0</div>
+      <div class="label">消費税</div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="sumPaid" style="color:var(--employer); font-size:22px;">¥0</div>
+      <div class="label">入金済み</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="sumUnpaid" style="color:var(--danger); font-size:22px;">¥0</div>
+      <div class="label">未入金</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cntCase" style="color:var(--match); font-size:22px;">0</div>
+      <div class="label">マッチング案件</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:17px; margin-bottom:14px;">マッチング案件一覧</h2>
+    <div id="billList"></div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('admin');
+  if (me) {
+    renderHeader('admin-billing.html');
+    renderFooter();
+    render();
+
+    function render() {
+      const db = loadDB();
+      const yen = n => '¥' + n.toLocaleString('ja-JP');
+      const matches = db.matches.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+
+      const incl = matches.reduce((s, m) => s + m.fee, 0);
+      const exTax = matches.reduce((s, m) => s + feeBreakdown(m.fee).exTax, 0);
+      const paid = matches.filter(m => m.paymentStatus === 'paid').reduce((s, m) => s + m.fee, 0);
+      const unpaid = matches.filter(m => m.paymentStatus === 'unpaid').reduce((s, m) => s + m.fee, 0);
+
+      document.getElementById('sumIncl').textContent = yen(incl);
+      document.getElementById('sumExTax').textContent = yen(exTax);
+      document.getElementById('sumTax').textContent = yen(incl - exTax);
+      document.getElementById('sumPaid').textContent = yen(paid);
+      document.getElementById('sumUnpaid').textContent = yen(unpaid);
+      document.getElementById('cntCase').textContent = matches.length;
+
+      const el = document.getElementById('billList');
+      if (matches.length === 0) {
+        el.innerHTML = '<div class="empty">マッチング成立案件はまだありません。</div>';
+        return;
+      }
+
+      el.innerHTML = `<table class="list">
+        <tr><th>成立日</th><th>案件 / 採用者</th><th>求人者</th><th>金額（税込）</th><th>決済方法</th><th>入金状況</th><th>請求書</th></tr>
+        ${matches.map(m => {
+          const job = getJob(db, m.jobId);
+          const seeker = getUser(db, m.seekerId);
+          const employer = getUser(db, m.employerId);
+          const methodLabel = PAYMENT_METHOD_LABEL[m.paymentMethod] || '-';
+          const payCell = m.paymentStatus === 'paid'
+            ? '<span class="status paid">入金済み</span>'
+            : '<span class="status unpaid">未入金</span><br><button class="btn small outline" style="margin-top:4px;" onclick="markPaid(\'' + m.id + '\')">入金済みにする</button>';
+          const invCell = m.invoiceNo
+            ? `<div style="font-size:12px; color:var(--muted)">${esc(m.invoiceNo)}</div><br>${esc(m.invoiceIssuedAt)}<br><button class="btn small purple" style="margin-top:4px;" onclick="issue('${m.id}')">再発行</button>`
+            : `<button class="btn small purple" onclick="issue('${m.id}')">📄 請求書を発行</button>`;
+          return `<tr>
+            <td>${esc(m.createdAt)}</td>
+            <td><strong>${esc(job.title)}</strong><br><span style="font-size:12px; color:var(--muted)">採用：${esc(seeker.name)}（${esc(seeker.profile.category)}）</span></td>
+            <td>${esc(employer.org.name)}</td>
+            <td>${yen(m.fee)}</td>
+            <td>${esc(methodLabel)}</td>
+            <td>${payCell}</td>
+            <td>${invCell}</td>
+          </tr>`;
+        }).join('')}
+      </table>`;
+    }
+
+    // 請求書の発行（番号採番 → 印刷/PDFウィンドウを開く）
+    window.issue = function (matchId) {
+      const db = loadDB();
+      const m = getMatch(db, matchId);
+      if (!m.invoiceNo) {
+        m.invoiceNo = makeInvoiceNo();
+        m.invoiceIssuedAt = nowStr();
+        saveDB(db);
+      }
+      openInvoice(matchId);
+      render();
+    };
+
+    window.markPaid = function (matchId) {
+      const db = loadDB();
+      const m = getMatch(db, matchId);
+      if (!confirm('この案件を「入金済み」にしますか？')) return;
+      m.paymentStatus = 'paid';
+      m.paid = true;
+      saveDB(db);
+      render();
+    };
+  }
+</script>
+</body>
+</html>

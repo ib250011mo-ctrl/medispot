@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>履歴書・職務経歴書｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-seeker">
+
+  <div id="header">
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href="index.html">
+          <span class="mark">🏥</span>
+          メディスポット
+        </a>
+        <nav>
+          <span class="role-badge seeker">求職者：佐藤 花子</span>
+          <a href="seeker-home.html">マイページ</a>
+          <a href="seeker-profile.html">プロフィール</a>
+          <a href="seeker-resume.html" class="active">履歴書・職歴</a>
+          <a href="seeker-jobs.html">求人検索</a>
+          <a href="#" onclick="logout();return false;">ログアウト</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <div class="container">
+    <h1 class="page-title">履歴書・職務経歴書</h1>
+    <p class="page-lead">履歴書・職務経歴書に一般的に記載する項目を登録できます。入力内容は応募時に医療機関へ提示されます。</p>
+
+    <div class="notice success" id="saved" style="display:none;">✅ 履歴書・職務経歴書を保存しました。</div>
+
+    <form onsubmit="return save(event)">
+
+      <!-- ===== 履歴書 ===== -->
+      <div class="card">
+        <h2 style="font-size:18px; margin-bottom:4px;">📋 履歴書</h2>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:18px;">氏名・生年月日・年齢はプロフィール（スキル・プロフィール登録）の内容を使用します。職務経歴は下の「職務経歴書」にまとめて入力してください。</p>
+
+        <!-- 学歴 -->
+        <div class="field">
+          <label>学歴</label>
+          <div id="eduRows">
+            <div class="repeat-row">
+              <input type="text" data-k="ym" placeholder="年月（例 2013-03）" value="2010-03" style="flex:0 0 150px;">
+              <input type="text" data-k="content" placeholder="学校名・学部・卒業/入学 など" value="東京都立〇〇高等学校 普通科 卒業" style="flex:1;">
+              <button type="button" class="btn small danger rm" onclick="this.parentNode.remove()">削除</button>
+            </div>
+            <div class="repeat-row">
+              <input type="text" data-k="ym" placeholder="年月（例 2013-03）" value="2013-03" style="flex:0 0 150px;">
+              <input type="text" data-k="content" placeholder="学校名・学部・卒業/入学 など" value="〇〇看護専門学校 看護学科 卒業" style="flex:1;">
+              <button type="button" class="btn small danger rm" onclick="this.parentNode.remove()">削除</button>
+            </div>
+          </div>
+          <button type="button" class="btn small outline" onclick="addEdu()">＋ 学歴を追加</button>
+        </div>
+
+        <!-- 免許・資格 -->
+        <div class="field">
+          <label>免許・資格</label>
+          <div id="licRows">
+            <div class="repeat-row">
+              <input type="text" data-k="ym" placeholder="取得年月（例 2013-04）" value="2013-04" style="flex:0 0 150px;">
+              <input type="text" data-k="name" placeholder="免許・資格の名称" value="正看護師免許 取得" style="flex:1;">
+              <button type="button" class="btn small danger rm" onclick="this.parentNode.remove()">削除</button>
+            </div>
+            <div class="repeat-row">
+              <input type="text" data-k="ym" placeholder="取得年月（例 2013-04）" value="2018-06" style="flex:0 0 150px;">
+              <input type="text" data-k="name" placeholder="免許・資格の名称" value="BLSプロバイダー 取得" style="flex:1;">
+              <button type="button" class="btn small danger rm" onclick="this.parentNode.remove()">削除</button>
+            </div>
+          </div>
+          <button type="button" class="btn small outline" onclick="addLic()">＋ 免許・資格を追加</button>
+        </div>
+
+        <!-- 本人希望記入欄 -->
+        <div class="field">
+          <label>本人希望記入欄</label>
+          <textarea id="fWishes" placeholder="勤務時間・勤務地・その他の希望があればご記入ください。"></textarea>
+        </div>
+      </div>
+
+      <!-- ===== 職務経歴書 ===== -->
+      <div class="card">
+        <h2 style="font-size:18px; margin-bottom:18px;">📄 職務経歴書</h2>
+
+        <!-- 職歴要約 -->
+        <div class="field">
+          <label>職歴要約</label>
+          <textarea id="fSummary" placeholder="これまでの職業経験の概要を簡潔にご記入ください。"></textarea>
+        </div>
+
+        <!-- 職務経歴 -->
+        <div class="field">
+          <label>職務経歴</label>
+          <p class="hint" style="margin-top:0; margin-bottom:8px;">在籍期間・勤務先・部署/役職・業務内容を入力してください。</p>
+          <div id="careerRows"></div>
+          <button type="button" class="btn small outline" onclick="addCareer()">＋ 職務経歴を追加</button>
+        </div>
+
+        <!-- 活かせる経験・知識・スキル -->
+        <div class="field">
+          <label>活かせる経験・知識・スキル</label>
+          <textarea id="fStrengths" placeholder="例）外来トリアージ、電子カルテ運用、後輩指導 など"></textarea>
+        </div>
+
+        <!-- 自己PR -->
+        <div class="field">
+          <label>自己PR</label>
+          <textarea id="fSelfPr" placeholder="強み・人柄・仕事への姿勢などをご記入ください。"></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="submit" class="btn block" style="flex:1;">履歴書・職務経歴書を保存する</button>
+          <button type="button" class="btn outline" onclick="downloadResume()">📄 ダウンロード</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div id="footer">
+    <footer class="site-footer">
+      " 医療特化型広告マッチングシステム プロトタイプ V1 ／ "
+      <a href="#" onclick="resetDB();return false;">デモデータを初期化</a>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const me = requireRole('seeker');
+    if (me) {
+      renderHeader('seeker-resume.html');
+      renderFooter();
+
+      const r = me.resume || {};
+
+      /* ---- 可変行の生成ヘルパー ---- */
+      function rowHTML(fields, vals) {
+        const inputs = fields.map(f =>
+          `<input type="text" data-k="${f.k}" placeholder="${f.ph}" value="${esc((vals && vals[f.k]) || '')}" style="${f.style || ''}">`
+        ).join('');
+        return `<div class="repeat-row">${inputs}<button type="button" class="btn small danger rm" onclick="this.parentNode.remove()">削除</button></div>`;
+      }
+
+      function addRowTo(containerId, fields, vals) {
+        document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(fields, vals));
+      }
+
+      const EDU_F = [
+        { k: 'ym',      ph: '年月（例 2013-03）', style: 'flex:0 0 150px;' },
+        { k: 'content', ph: '学校名・学部・卒業/入学 など', style: 'flex:1;' }
+      ];
+      const LIC_F = [
+        { k: 'ym',   ph: '取得年月（例 2013-04）', style: 'flex:0 0 150px;' },
+        { k: 'name', ph: '免許・資格の名称', style: 'flex:1;' }
+      ];
+      const CAREER_F = [
+        { k: 'period',  ph: '期間（例 2013/04〜現在）', style: 'flex:0 0 170px;' },
+        { k: 'company', ph: '勤務先', style: 'flex:1;' },
+        { k: 'dept',    ph: '部署・役職', style: 'flex:1;' },
+        { k: 'detail',  ph: '業務内容・実績', style: 'flex:2;' },
+      ];
+
+      window.addEdu    = (v) => addRowTo('eduRows',    EDU_F,    v);
+      window.addLic    = (v) => addRowTo('licRows',    LIC_F,    v);
+      window.addCareer = (v) => addRowTo('careerRows', CAREER_F, v);
+
+      // 旧データ（職歴概要 workHistory が残っていれば職務経歴へ引き継ぐ）
+      let careerInit = (r.careers && r.careers.length) ? r.careers.slice() : [];
+      if (careerInit.length === 0 && r.workHistory && r.workHistory.length) {
+        careerInit = r.workHistory.map(w => ({
+          period: w.ym || '',
+          company: w.content || '',
+          dept: '',
+          detail: ''
+        }));
+      }
+
+      // 既存データの復元（無ければ空行を1つ用意）
+      (r.education && r.education.length ? r.education : [null]).forEach(addEdu);
+      (r.licenses  && r.licenses.length  ? r.licenses  : [null]).forEach(addLic);
+      (careerInit.length ? careerInit : [null]).forEach(addCareer);
+
+      document.getElementById('fWishes').value   = r.wishes   || '';
+      document.getElementById('fSummary').value  = r.summary  || '';
+      document.getElementById('fStrengths').value = r.strengths || '';
+      document.getElementById('fSelfPr').value   = r.selfPr   || me.profile?.pr || '';
+
+      /* ---- 可変行の収集 ---- */
+      function collect(containerId, keys) {
+        return [...document.querySelectorAll(`#${containerId} .repeat-row`)].map(row => {
+          const o = {};
+          row.querySelectorAll('input').forEach(i => o[i.dataset.k] = i.value.trim());
+          return o;
+        }).filter(o => keys.some(k => o[k]));
+      }
+
+      function buildResume() {
+        return {
+          education:  collect('eduRows',    ['ym', 'content']),
+          licenses:   collect('licRows',    ['ym', 'name']),
+          wishes:     document.getElementById('fWishes').value.trim(),
+          summary:    document.getElementById('fSummary').value.trim(),
+          careers:    collect('careerRows', ['period', 'company', 'dept', 'detail']),
+          strengths:  document.getElementById('fStrengths').value.trim(),
+          selfPr:     document.getElementById('fSelfPr').value.trim(),
+        };
+      }
+
+      window.save = function (e) {
+        e.preventDefault();
+        const db = loadDB();
+        getUser(db, me.id).resume = buildResume();
+        saveDB(db);
+        document.getElementById('saved').style.display = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      };
+
+      window.downloadResume = function () {
+        const data = buildResume();
+        const p    = me.profile || {};
+        const age  = calcAge(p.birthdate);
+        const L    = [];
+        L.push('履歴書');
+        L.push('========================================');
+        L.push(`氏名：${me.name}`);
+        L.push(`生年月日：${p.birthdate || '-'}${age !== null ? ` (${age}歳)` : ''}`);
+        L.push(`メール：${me.email}`);
+        L.push('');
+        L.push('【学歴】');
+        data.education.forEach(x => L.push(`  ${x.ym || ''}  ${x.content || ''}`));
+        L.push('【免許・資格】');
+        data.licenses.forEach(x => L.push(`  ${x.ym || ''}  ${x.name || ''}`));
+        L.push('【本人希望記入欄】');
+        L.push(`  ${data.wishes || '-'}`);
+        L.push('');
+        L.push('');
+        L.push('職務経歴書');
+        L.push('========================================');
+        L.push(`氏名：${me.name}　保有資格：${p.license || p.category || '-'}`);
+        L.push('');
+        L.push('【職歴要約】');
+        L.push(`  ${data.summary || '-'}`);
+        L.push('【職務経歴】');
+        data.careers.forEach(x => {
+          L.push(`  ■ ${x.period || ''}  ${x.company || ''} (${x.dept || ''})`);
+          L.push(`      ${x.detail || ''}`);
+        });
+        L.push('【活かせる経験・知識・スキル】');
+        L.push(`  ${data.strengths || '-'}`);
+        L.push('【自己PR】');
+        L.push(`  ${data.selfPr || '-'}`);
+        const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `履歴書・職務経歴書 ${me.name}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+    }
+  </script>
+</body>
+</html>

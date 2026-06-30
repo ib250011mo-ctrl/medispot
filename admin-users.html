@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会員管理｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-admin">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">会員管理</h1>
+  <p class="page-lead">求人者（医療機関）・求職者（医療資格者）双方の登録情報を管理します。</p>
+
+  <div class="card">
+    <h2 style="font-size:17px; margin-bottom:14px;">🏥 求人者（医療機関）</h2>
+    <div id="empList"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:17px; margin-bottom:14px;">👩‍⚕️ 求職者（医療資格者）</h2>
+    <div id="seekerList"></div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('admin');
+  if (me) {
+    renderHeader('admin-users.html');
+    renderFooter();
+    render();
+
+    function statusCell(u) {
+      return u.suspended
+        ? '<span class="status suspended">停止中</span>'
+        : '<span class="status active">有効</span>';
+    }
+
+    function actionBtn(u) {
+      return u.suspended
+        ? `<button class="btn small outline" onclick="toggleSuspend('${u.id}',false)">利用再開</button>`
+        : `<button class="btn small danger" onclick="toggleSuspend('${u.id}',true)">利用停止</button>`;
+    }
+
+    function render() {
+      const db = loadDB();
+
+      // 求人者
+      const emps = db.users.filter(u => u.role === 'employer');
+      document.getElementById('empList').innerHTML = emps.length === 0
+        ? '<div class="empty">求人者がいません。</div>'
+        : `<table class="list">
+            <tr><th>医療機関名</th><th>担当者</th><th>施設区分</th><th>掲載求人</th><th>成立</th><th>状態</th><th></th></tr>
+            ${emps.map(u => {
+              const jobs = jobsForEmployer(db, u.id).length;
+              const matched = db.matches.filter(m => m.employerId === u.id).length;
+              return `<tr>
+                <td><strong>${esc(u.org.name)}</strong><br><span style="font-size:12px;color:var(--muted)">${esc(u.email)}</span></td>
+                <td>${esc(u.name)}</td>
+                <td>${esc(u.org.facility || '-')}</td>
+                <td>${jobs}件</td>
+                <td>${matched}件</td>
+                <td>${statusCell(u)}</td>
+                <td>${actionBtn(u)}</td>
+              </tr>`;
+            }).join('')}
+          </table>`;
+
+      // 求職者
+      const seekers = db.users.filter(u => u.role === 'seeker');
+      document.getElementById('seekerList').innerHTML = seekers.length === 0
+        ? '<div class="empty">求職者がいません。</div>'
+        : `<table class="list">
+            <tr><th>氏名</th><th>職種</th><th>年齢</th><th>資格証</th><th>履歴書</th><th>応募</th><th>状態</th><th></th></tr>
+            ${seekers.map(u => {
+              const p = u.profile || {};
+              const age = calcAge(p.birthdate);
+              const apps = applicationsForSeeker(db, u.id).length;
+              return `<tr>
+                <td><strong>${esc(u.name)}</strong><br><span style="font-size:12px;color:var(--muted)">${esc(u.email)}</span></td>
+                <td>${esc(p.category || '-')}</td>
+                <td>${age !== null ? age + '歳' : '-'}</td>
+                <td>${(u.certificates && u.certificates.length) ? '🔒 ' + u.certificates.length + '件' : '<span style="color:var(--muted)">未提出</span>'}</td>
+                <td>${u.resume ? '📝 登録済' : '<span style="color:var(--muted)">未登録</span>'}</td>
+                <td>${apps}件</td>
+                <td>${statusCell(u)}</td>
+                <td>${actionBtn(u)}</td>
+              </tr>`;
+            }).join('')}
+          </table>`;
+    }
+
+    window.toggleSuspend = function (id, suspend) {
+      const db = loadDB();
+      const u = getUser(db, id);
+      if (suspend && !confirm(`${u.role === 'employer' ? u.org.name : u.name} の利用を停止しますか？\n停止中はログインできなくなります。`)) return;
+      u.suspended = suspend;
+      saveDB(db);
+      render();
+    };
+  }
+</script>
+</body>
+</html>

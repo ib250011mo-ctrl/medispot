@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>請求書 INV-202606-0HJN</title>
+  <style>
+    body { font-family: "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif; color:#1f2937; padding:40px; max-width:720px; margin:0 auto; }
+    h1 { text-align:center; letter-spacing:8px; font-size:26px; margin-bottom:24px; }
+    .row { display:flex; justify-content:space-between; align-items:flex-start; }
+    .to { font-size:18px; font-weight:700; border-bottom:2px solid #1f2937; padding-bottom:4px; margin-bottom:8px; }
+    .meta { font-size:12px; text-align:right; color:#374151; }
+    .amount-box { border:2px solid #1f2937; padding:12px 16px; margin:24px 0; font-size:20px; font-weight:700; display:flex; justify-content:space-between; }
+    table { width:100%; border-collapse:collapse; margin-top:16px; font-size:14px; }
+    th, td { border:1px solid #9ca3af; padding:8px 10px; text-align:left; }
+    th { background:#f3f4f6; }
+    td.num { text-align:right; }
+    .totals { margin-left:auto; width:280px; margin-top:12px; }
+    .totals td { border:none; padding:4px 8px; }
+    .totals tr.total td { border-top:2px solid #1f2937; font-weight:700; font-size:16px; }
+    .issuer { margin-top:32px; font-size:13px; line-height:1.8; }
+    .note { margin-top:24px; font-size:12px; color:#6b7280; }
+    .stamp { margin-top:8px; }
+    @media print { .noprint { display:none; } body { padding:0; } }
+  </style>
+</head>
+<body>
+
+<h1>請求書</h1>
+
+<div class="row">
+  <div>
+    <div class="to" id="toName">－－ 御中</div>
+    <div style="font-size:13px;" id="toDetail"></div>
+  </div>
+  <div class="meta" id="meta"></div>
+</div>
+
+<p style="margin-top:24px; font-size:14px;">下記のとおりご請求申し上げます。</p>
+
+<div class="amount-box">
+  <span>ご請求金額（税込）</span>
+  <span id="amountIncl">¥0</span>
+</div>
+
+<table>
+  <tbody>
+    <tr>
+      <th>品目</th>
+      <th>摘要</th>
+      <th style="width:120px;">金額（税抜）</th>
+    </tr>
+    <tr>
+      <td>マッチング成功報酬</td>
+      <td id="itemDesc"></td>
+      <td class="num" id="itemAmount">¥0</td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="totals">
+  <tbody>
+    <tr>
+      <td>小計（税抜）</td>
+      <td class="num" id="subtotal">¥0</td>
+    </tr>
+    <tr>
+      <td>消費税（10%）</td>
+      <td class="num" id="tax">¥0</td>
+    </tr>
+    <tr class="total">
+      <td>合計（税込）</td>
+      <td class="num" id="total">¥0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="issuer">
+  <strong>メディスポット運営事務局</strong><br>
+  〒000-0000　東京都〇〇区〇〇 1-2-3<br>
+  TEL：03-0000-0000／Email：billing@medispot.example<br>
+  振込先：〇〇銀行　〇〇支店　普通　0000000　メディスポット（カ
+</div>
+
+<p class="note">※ 本請求書はメディスポット プロトタイプが生成したサンプルです（モック）。お支払い期限・振込先等は実運用時に設定してください。</p>
+
+<div class="noprint" style="text-align:center; margin-top:32px;">
+  <button onclick="window.print()" style="padding:10px 24px; font-size:15px; cursor:pointer;">🖨 印刷 / PDFとして保存</button>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  const db = loadDB();
+  const m = getMatch(db, qs('matchId'));
+  if (m) {
+    const job = getJob(db, m.jobId);
+    const seeker = getUser(db, m.seekerId);
+    const employer = getUser(db, m.employerId);
+    const fb = feeBreakdown(m.fee);
+    const yen = n => '¥' + n.toLocaleString('ja-JP');
+
+    document.title = `請求書 ${m.invoiceNo || ''}`;
+    document.getElementById('toName').textContent = `${employer.org.name} 御中`;
+    document.getElementById('toDetail').innerHTML = `${esc(employer.org.address || '')}<br>ご担当：${esc(employer.name)} 様`;
+    document.getElementById('meta').innerHTML =
+      `請求書番号：${esc(m.invoiceNo || '-')}<br>発行日：${esc(m.invoiceIssuedAt || nowStr())}<br>お支払方法：${esc(PAYMENT_METHOD_LABEL[m.paymentMethod] || '請求書払い')}`;
+
+    document.getElementById('amountIncl').textContent = yen(m.fee);
+    document.getElementById('itemDesc').innerHTML =
+      `求人「${esc(job.title)}」／採用者：${esc(seeker.name)} 様（${esc(seeker.profile.category)}）<br>マッチング成立日：${esc(m.createdAt)}`;
+    document.getElementById('itemAmount').textContent = yen(fb.exTax);
+    document.getElementById('subtotal').textContent = yen(fb.exTax);
+    document.getElementById('tax').textContent = yen(m.fee - fb.exTax);
+    document.getElementById('total').textContent = yen(m.fee);
+  }
+</script>
+</body>
+</html>

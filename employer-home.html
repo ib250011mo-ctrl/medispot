@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>求人者マイページ｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="role-employer">
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title" id="welcome"></h1>
+  <p class="page-lead">求人者マイページ（ホーム）</p>
+
+  <!-- マッチング通知 -->
+  <div id="matchNotices"></div>
+
+  <!-- 応募通知 -->
+  <div id="applyNotices"></div>
+
+  <!-- ダッシュボード統計 -->
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="num" id="cntJobs" style="color:var(--employer)">0</div>
+      <div class="label">掲載中の求人</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cntApps" style="color:var(--seeker)">0</div>
+      <div class="label">選考中の応募者</div>
+    </div>
+    <div class="dash-card">
+      <div class="num" id="cntMatched" style="color:var(--match)">0</div>
+      <div class="label">マッチング成立</div>
+    </div>
+  </div>
+
+  <!-- メニューグリッド -->
+  <div class="menu-grid">
+    <a class="menu-link" href="employer-job-new.html">
+      <span class="icon">📋</span>
+      <span>
+        <h3>求人広告　新規作成</h3>
+        <p>掲載は無料。採用決定時のみ成功報酬が発生します</p>
+      </span>
+    </a>
+    <a class="menu-link" href="employer-jobs.html">
+      <span class="icon">📑</span>
+      <span>
+        <h3>掲載求人管理・一覧</h3>
+        <p>掲載中の求人の確認・応募者の選考</p>
+      </span>
+    </a>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  const me = requireRole('employer');
+  if (me) {
+    renderHeader('employer-home.html');
+    renderFooter();
+    document.getElementById('welcome').textContent = `${me.org.name} 様`;
+
+    const db = loadDB();
+    const myJobs = jobsForEmployer(db, me.id);
+    const myJobIds = myJobs.map(j => j.id);
+    const apps = db.applications.filter(a => myJobIds.includes(a.jobId));
+    const pending = apps.filter(a => a.status === 'applied' || a.status === 'screening');
+    const matches = matchesForUser(db, me.id);
+
+    document.getElementById('cntJobs').textContent = myJobs.filter(j => j.status === 'open').length;
+    document.getElementById('cntApps').textContent = pending.length;
+    document.getElementById('cntMatched').textContent = matches.length;
+
+    // マッチング通知
+    document.getElementById('matchNotices').innerHTML = matches.map(m => {
+      const job = getJob(db, m.jobId);
+      const seeker = getUser(db, m.seekerId);
+      return `<div class="notice match">
+        🎉 「${esc(job.title)}」で <strong>${esc(seeker.name)}</strong> さんとのマッチングが成立しました！
+        <a href="match-complete.html?matchId=${m.id}">通知を確認</a> /
+        <a href="chat.html?matchId=${m.id}">チャットルームへ</a>
+      </div>`;
+    }).join('');
+
+    // 応募通知
+    if (pending.length > 0) {
+      document.getElementById('applyNotices').innerHTML =
+        `<div class="notice info">📋 選考待ちの応募が <strong>${pending.length}件</strong> あります。
+        <a href="employer-jobs.html">掲載求人管理から確認する</a></div>`;
+    }
+  }
+</script>
+</body>
+</html>

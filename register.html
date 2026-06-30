@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新規会員登録｜メディスポット</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+  <h1 class="page-title">新規会員登録</h1>
+  <p class="page-lead">登録種別を選択して、必要事項を入力してください。</p>
+
+  <!-- Role Selection -->
+  <div class="role-select-grid" id="roleSelectGrid">
+    <div class="role-card" id="cardSeeker" onclick="selectRole('seeker')">
+      <span class="role-icon">👩‍⚕️</span>
+      <h3>求職者として登録</h3>
+      <p>医療資格者（看護師・検査技師・リハビリ職 など）</p>
+    </div>
+    <div class="role-card" id="cardEmployer" onclick="selectRole('employer')">
+      <span class="role-icon">🏥</span>
+      <h3>求人者として登録</h3>
+      <p>医療機関（病院・クリニック・薬局 など）</p>
+    </div>
+  </div>
+
+  <!-- Seeker Form -->
+  <div id="formSeeker" class="register-form" style="display:none;">
+    <h2 class="form-title">👩‍⚕️ 求職者（医療資格者）登録</h2>
+    <div id="errorSeeker" class="error-msg" style="display:none;"></div>
+
+    <div class="form-group">
+      <label>お名前 <span class="required">必須</span></label>
+      <input type="text" id="seekerName" placeholder="例：佐藤 花子">
+    </div>
+    <div class="form-group">
+      <label>保有資格（職種） <span class="required">必須</span></label>
+      <select id="seekerQualification">
+        <option value="">選択してください</option>
+        <option value="看護師">看護師</option>
+        <option value="准看護師">准看護師</option>
+        <option value="臨床検査技師">臨床検査技師</option>
+        <option value="放射線技師">放射線技師（診療放射線技師）</option>
+        <option value="理学療法士">理学療法士（PT）</option>
+        <option value="作業療法士">作業療法士（OT）</option>
+        <option value="言語聴覚士">言語聴覚士（ST）</option>
+        <option value="介護福祉士">介護福祉士</option>
+        <option value="ヘルパー">ヘルパー</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>メールアドレス <span class="required">必須</span></label>
+      <input type="email" id="seekerEmail" placeholder="例：hanako@example.com">
+    </div>
+    <div class="form-group">
+      <label>パスワード <span class="required">必須</span></label>
+      <input type="password" id="seekerPassword" placeholder="6文字以上">
+      <p class="form-note">※ プロトタイプのためパスワードは平文でブラウザ内に保存されます。実際のパスワードを使用しないでください。</p>
+    </div>
+    <button class="btn btn-primary" onclick="registerSeeker()">この内容で登録する</button>
+    <button class="btn btn-ghost" onclick="resetRole()">← 登録種別を変更する</button>
+  </div>
+
+  <!-- Employer Form -->
+  <div id="formEmployer" class="register-form" style="display:none;">
+    <h2 class="form-title">🏥 求人者（医療機関）登録</h2>
+    <div id="errorEmployer" class="error-msg" style="display:none;"></div>
+
+    <div class="form-group">
+      <label>お名前（ご担当者名） <span class="required">必須</span></label>
+      <input type="text" id="employerName" placeholder="例：山田 太郎">
+    </div>
+    <div class="form-group">
+      <label>医療機関名 <span class="required">必須</span></label>
+      <input type="text" id="employerOrg" placeholder="例：ブランチ総合クリニック">
+    </div>
+    <div class="form-group">
+      <label>施設区分</label>
+      <select id="employerType">
+        <option value="">選択してください</option>
+        <option value="病院">病院</option>
+        <option value="クリニック（無床）">クリニック（無床）</option>
+        <option value="クリニック（有床）">クリニック（有床）</option>
+        <option value="調剤薬局">調剤薬局</option>
+        <option value="介護・福祉施設">介護・福祉施設</option>
+        <option value="健診センター">健診センター</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>所在地</label>
+      <input type="text" id="employerLocation" placeholder="例：東京都渋谷区">
+    </div>
+    <div class="form-group">
+      <label>メールアドレス <span class="required">必須</span></label>
+      <input type="email" id="employerEmail" placeholder="例：info@clinic.example.com">
+    </div>
+    <div class="form-group">
+      <label>パスワード <span class="required">必須</span></label>
+      <input type="password" id="employerPassword" placeholder="6文字以上">
+      <p class="form-note">※ プロトタイプのためパスワードは平文でブラウザ内に保存されます。実際のパスワードを使用しないでください。</p>
+    </div>
+    <button class="btn btn-primary" onclick="registerEmployer()">この内容で登録する</button>
+    <button class="btn btn-ghost" onclick="resetRole()">← 登録種別を変更する</button>
+  </div>
+
+  <p class="login-link">すでにアカウントをお持ちの方は <a href="login.html">ログイン</a></p>
+</div>
+
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  renderHeader(null);
+  renderFooter();
+
+  // URLパラメータでrole自動選択
+  const params = new URLSearchParams(location.search);
+  const roleParam = params.get('role');
+  if (roleParam === 'seeker') selectRole('seeker');
+  if (roleParam === 'employer') selectRole('employer');
+
+  function selectRole(role) {
+    document.getElementById('roleSelectGrid').style.display = 'none';
+    document.getElementById('formSeeker').style.display = role === 'seeker' ? 'block' : 'none';
+    document.getElementById('formEmployer').style.display = role === 'employer' ? 'block' : 'none';
+  }
+
+  function resetRole() {
+    document.getElementById('roleSelectGrid').style.display = 'grid';
+    document.getElementById('formSeeker').style.display = 'none';
+    document.getElementById('formEmployer').style.display = 'none';
+  }
+
+  function registerSeeker() {
+    const name = document.getElementById('seekerName').value.trim();
+    const qualification = document.getElementById('seekerQualification').value;
+    const email = document.getElementById('seekerEmail').value.trim();
+    const password = document.getElementById('seekerPassword').value;
+    const errEl = document.getElementById('errorSeeker');
+
+    if (!name || !qualification || !email || !password) {
+      errEl.textContent = '必須項目をすべて入力してください。';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = 'パスワードは6文字以上で設定してください。';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const db = loadDB();
+    if (db.users.find(u => u.email === email)) {
+      errEl.textContent = 'このメールアドレスはすでに登録されています。';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const newUser = {
+      id: 'u_' + Date.now(),
+      role: 'seeker',
+      name,
+      qualification,
+      email,
+      password,
+      createdAt: new Date().toISOString()
+    };
+    db.users.push(newUser);
+    saveDB(db);
+
+    // 自動ログイン
+    sessionStorage.setItem('currentUserId', newUser.id);
+    location.href = 'seeker-home.html';
+  }
+
+  function registerEmployer() {
+    const name = document.getElementById('employerName').value.trim();
+    const org = document.getElementById('employerOrg').value.trim();
+    const type = document.getElementById('employerType').value;
+    const location = document.getElementById('employerLocation').value.trim();
+    const email = document.getElementById('employerEmail').value.trim();
+    const password = document.getElementById('employerPassword').value;
+    const errEl = document.getElementById('errorEmployer');
+
+    if (!name || !org || !email || !password) {
+      errEl.textContent = '必須項目をすべて入力してください。';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = 'パスワードは6文字以上で設定してください。';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const db = loadDB();
+    if (db.users.find(u => u.email === email)) {
+      errEl.textContent = 'このメールアドレスはすでに登録されています。';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const newUser = {
+      id: 'u_' + Date.now(),
+      role: 'employer',
+      name,
+      org: { name: org, type, location },
+      email,
+      password,
+      createdAt: new Date().toISOString()
+    };
+    db.users.push(newUser);
+    saveDB(db);
+
+    // 自動ログイン
+    sessionStorage.setItem('currentUserId', newUser.id);
+    location.href = 'employer-home.html';
+  }
+</script>
+</body>
+</html>
